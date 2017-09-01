@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>缓冲</title>
+  <style>
+  </style>
+</head>
+<body>
+  <div id="scrollBox">
+  </div>
+  <script>
+    const html = []
+    for (let i = 0; i < 1000; i++) {
+      html.push(`<p>${i}${i}${i}${i}${i}</p>`)
+    }
+    document.getElementById('scrollBox').innerHTML = html.join('')
+  </script>
+  <script type="module">
+    import css from '../css.js'
+    import animate from '../animate.js'
+
+    const scrollBox = document.getElementById('scrollBox')
+    const start = { pageY: 0, cssY: 0 }
+    const last = { disY: 0, cssY: 0, time: 0, disTime: 0 }
+    let animator = null
+
+    scrollBox.addEventListener('touchstart', function (e) {
+      e.preventDefault()
+      animator && animator.stop()
+      start.pageY = e.changedTouches[0].pageY
+      start.cssY = css(this, 'translateY')
+      last.time = ~~new Date()
+    })
+    scrollBox.addEventListener('touchmove', function (e) {
+      const disY = e.changedTouches[0].pageY - start.pageY
+      const cssY = start.cssY + disY
+      const nowTime = ~~new Date()
+      css(this, 'translateY', cssY)
+      last.disY = cssY - last.cssY
+      last.cssY = cssY
+      last.disTime = nowTime - last.time
+      last.time = nowTime
+    })
+    scrollBox.addEventListener('touchend', function (e) {
+      const speed = last.disY / last.disTime
+      console.log(speed, parseInt(speed * 300))
+      const translateY = last.cssY + parseInt(speed * 300)
+      //console.log(target)
+      animator = animate(scrollBox, {
+        style: {
+          translateY
+        },
+        type: "easeOut",
+        time: Math.abs(parseInt(speed * 300))*1.2
+      })
+      console.log(last.disY, last.disTime)
+    })
+  </script>
+</body>
+</html>
