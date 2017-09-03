@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>全景</title>
+    <style>
+      html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+    </style>
+</head>
+<body>
+<div id="box" style="width: 100%; height: 100%;"></div>
+<script>
+  document.body.addEventListener('touchstart', e => {
+    e.preventDefault()
+  })
+</script>
+<script type="module">
+  import css from '../css.js'
+  import animate from '../animate.js'
+
+  const images = [
+    'http://7jptea.com1.z0.glb.clouddn.com/panorama/1/cf_0.jpg',
+    'http://7jptea.com1.z0.glb.clouddn.com/panorama/1/cf_1.jpg',
+    'http://7jptea.com1.z0.glb.clouddn.com/panorama/1/cf_2.jpg',
+    'http://7jptea.com1.z0.glb.clouddn.com/panorama/1/cf_3.jpg',
+    'http://7jptea.com1.z0.glb.clouddn.com/panorama/1/cf_4.jpg',
+    'http://7jptea.com1.z0.glb.clouddn.com/panorama/1/cf_5.jpg',
+  ]
+
+  function Panorama (el, options) {
+    this.rotateEl = document.createElement('div')
+    this.translateZEl = document.createElement('div')
+    this.render(el, options)
+    this.addEvent()
+  }
+
+  Panorama.prototype.render = function (selector, { images, imageWidth, perspective = 350, translateZ = 400 }) {
+    const rotateEl = this.rotateEl
+    const translateZEl = this.translateZEl
+    const el = typeof selector === 'string' ? document.querySelector(selector) : selector
+    const items = (function () {
+      let html = []
+      function getRotate (i) {
+        return i < 4 ? `rotateY(-${i * 90}deg)` : `rotateX(${i === 4 ? -90 : 90}deg)`
+      }
+      for (let i = 0; i < images.length; i++) {
+        html.push(`<div style="
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: url(${images[i]}) no-repeat;
+          background-size: 100% 100%;
+          -webkit-transfrom: ${getRotate(i)} translateZ(-${imageWidth / 2 - 3}px);
+          transform: ${getRotate(i)} translateZ(-${imageWidth / 2 - 3}px);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+        "></div>`)
+      }
+      return html.join('')
+    })()
+    translateZEl.style.cssText = `transform: translateZ(${translateZ}px); -webkit-transform: translateZ(${translateZ}px); position: absolute; left: 0; top: 0; bottom: 0; right: 0; transform-style: preserve-3d; -webkit-transform-style: preserve-3d;`
+    rotateEl.style.cssText = `margin: -${imageWidth / 2}px 0 0 -${imageWidth / 2}px; width: ${imageWidth}px; height: ${imageWidth}px; position: absolute; left: 50%; top: 50%; transform-style: preserve-3d; -webkit-transform-style: preserve-3d;`
+    rotateEl.innerHTML = items
+    translateZEl.appendChild(rotateEl)
+    el.appendChild(translateZEl)
+    css(el, 'perspective', perspective)
+  }
+
+  Panorama.prototype.addEvent = function () {
+    const el = this.rotateEl
+    const start = { pageX: 0, pageY: 0, cssX: 0, cssY: 0 }
+    const last = { disY: 0, cssY: 0, time: 0, disTime: 0 }
+    let animator = null
+
+    function touchstart (e) {
+      e.preventDefault()
+      animator && animator.stop()
+      start.pageX = e.pageX || e.changedTouches[0].pageX
+      start.pageY = e.pageY || e.changedTouches[0].pageY
+
+      start.cssY = css(this, 'rotateX')
+      start.cssX = css(this, 'rotateY')
+
+      last.time = ~~new Date()
+
+      last.disX = 0
+      last.disY = 0
+
+      last.cssX = start.cssX
+      last.cssY = start.cssY
+      last.disTime = 0
+
+      el.addEventListener('mousemove', touchmove)
+    }
+
+    function touchmove (e) {
+      const disX = ((e.pageX || e.changedTouches[0].pageX) - start.pageX) / 10
+      const disY = ((e.pageY || e.changedTouches[0].pageY) - start.pageY) / 10
+
+      const cssX = start.cssX - disX
+      const cssY = start.cssY + disY
+
+      const nowTime = ~~new Date()
+
+      css(this, 'rotateX', cssY)
+      css(this, 'rotateY', cssX)
+
+      last.disX = cssX - last.cssX
+      last.disY = cssY - last.cssY
+
+      last.cssX = cssX
+      last.cssY = cssY
+
+      last.disTime = nowTime - last.time
+      last.time = nowTime
+    }
+
+    function touchend () {
+      el.removeEventListener('mousemove', touchmove)
+      
+      const speedY = last.disX / last.disTime
+      const speedX = last.disY / last.disTime
+
+      if (last.cssY === start.cssY) return
+      const disX = parseInt(speedX * 300)
+      const disY = parseInt(speedY * 300)
+      let rotateX = last.cssY + disX
+      let rotateY = last.cssX + disY
+      let style = {}
+      let speed = 0
+
+      if (rotateX > 45) {
+        rotateX = 45
+      } else if (rotateX < -45) {
+        rotateX = -45
+      }
+      if (Math.abs(disY) > Math.abs(disX)) {
+        style = { rotateY }
+        speed = speedY
+      } else {
+        style = { rotateX }
+        speed = speedX
+      }
+      if (Math.abs(speed) > 0.1) {
+        animator = animate(el, {
+          style,
+          type: "easeOutStrong",
+          time: Math.abs(parseInt(speed * 300)) * 15
+        })
+      }
+    }
+
+    el.addEventListener('touchstart', touchstart)
+    el.addEventListener('touchmove', touchmove)
+    el.addEventListener('touchend', touchend)
+    el.addEventListener('mousedown', touchstart)
+    el.addEventListener('mouseup', touchend)
+  }
+
+  new Panorama('#box', { images, imageWidth: 1252 })
+</script>
+</body>
+</html>
