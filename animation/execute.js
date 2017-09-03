@@ -39,21 +39,22 @@ function execute (options) {
 
   function step () {
     const changeTime = now()
-    const scale = 1 - Math.max(0, startTime - changeTime + time) / time
+    const scale = 1 - ((Math.max(0, startTime - changeTime + time) / time) || 0)
     const value = []
 
     targets.forEach(target => {
-      value.push(Tween[type](scale * time, target[0], target[1] - target[0], time))
+      const currentValue = target[0] === target[1] ? target[0] : Tween[type](scale * time, target[0], target[1] - target[0], time) || 0
+      value.push(currentValue)
     })
 
     running(value)
+
     if (scale === 1) {
       cancelAnimationFrame(timer)
       end && end()
     } else {
       timer = requestAnimationFrame(step)
     }
-    console.log(timer)
   }
 
   cancelAnimationFrame(timer)

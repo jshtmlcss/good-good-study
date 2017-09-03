@@ -6,15 +6,23 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>缓冲</title>
   <style>
+    body, html {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
-  <div id="scrollBox">
-  </div>
+  <ul id="scrollBox"></ul>
   <script>
     const html = []
-    for (let i = 0; i < 1000; i++) {
-      html.push(`<p>${i}${i}${i}${i}${i}</p>`)
+    const getRandomColor = function () {
+      return '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).substr(-6)
+    }
+    for (let i = 0; i < 100; i++) {
+      html.push(`<li style="width: 150px;height: 150px; background: ${getRandomColor()}"></li>`)
     }
     document.getElementById('scrollBox').innerHTML = html.join('')
   </script>
@@ -27,14 +35,18 @@
     const last = { disY: 0, cssY: 0, time: 0, disTime: 0 }
     let animator = null
 
-    scrollBox.addEventListener('touchstart', function (e) {
+    function touchstart (e) {
       e.preventDefault()
       animator && animator.stop()
       start.pageY = e.changedTouches[0].pageY
       start.cssY = css(this, 'translateY')
       last.time = ~~new Date()
-    })
-    scrollBox.addEventListener('touchmove', function (e) {
+      last.disY = 0
+      last.cssY = start.cssY
+      last.disTime = 0
+    }
+
+    function touchmove (e) {
       const disY = e.changedTouches[0].pageY - start.pageY
       const cssY = start.cssY + disY
       const nowTime = ~~new Date()
@@ -43,21 +55,24 @@
       last.cssY = cssY
       last.disTime = nowTime - last.time
       last.time = nowTime
-    })
-    scrollBox.addEventListener('touchend', function (e) {
+    }
+
+    function touchend () {
       const speed = last.disY / last.disTime
-      console.log(speed, parseInt(speed * 300))
+      if (last.cssY === start.cssY || Math.abs(speed) < 0.5) return
       const translateY = last.cssY + parseInt(speed * 300)
-      //console.log(target)
       animator = animate(scrollBox, {
         style: {
           translateY
         },
-        type: "easeOut",
-        time: Math.abs(parseInt(speed * 300))*1.2
+        type: "easeOutStrong",
+        time: Math.abs(parseInt(speed * 300)) * 1.2
       })
-      console.log(last.disY, last.disTime)
-    })
+    }
+
+    scrollBox.addEventListener('touchstart', touchstart)
+    scrollBox.addEventListener('touchmove', touchmove)
+    scrollBox.addEventListener('touchend', touchend)
   </script>
 </body>
 </html>
