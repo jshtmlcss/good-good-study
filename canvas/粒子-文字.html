@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>粒子</title>
+</head>
+<body>
+  <canvas id="canvas" style="display: block; margin: 100px auto;"></canvas>
+  <script type="module">
+    const canvas = document.getElementById('canvas')
+    canvas.width = 1000
+    canvas.height = 500
+    canvas.style.width = canvas.width / 2 + 'px'
+    canvas.style.height = canvas.height / 2 + 'px'
+    const ctx = canvas.getContext('2d')
+    let timer = null
+    let stop = false
+    let particles = []
+    let particlesLength = 0
+
+    function getImageData (text) {
+      drawText(text)
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+      let girdX = 3
+      let girdY = 3
+      for (let x = 0; x < canvas.width; x += girdX) {
+        for (let y = 0; y < canvas.height; y += girdY) {
+          let pos = (y * canvas.width + x) * 4
+          if (data[pos + 3] > 128) {
+            particles.push(new Dot(x, y, x, y, [data[pos], data[pos + 1], data[pos + 2], data[pos + 3]]))
+          }
+        }
+      }
+      particlesLength = particles.length
+    }
+
+    function drawText (text) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.font = '200px 微软雅黑 bold'
+      ctx.fillStyle = '#000'
+      ctx.textAlign = 'center'
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2)
+    }
+
+    function draw (text) {
+      getImageData(text)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      particles.forEach(dot => {
+        dot.x = Math.random() * canvas.width
+        dot.y = Math.random() * canvas.height
+        dot.draw()
+      })
+      animate()
+    }
+
+    function animate () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      particles.forEach(dot => {
+        if (Math.abs(dot.dx - dot.x) < 0.1 && Math.abs(dot.dy - dot.y) < 0.1) {
+          dot.x = dot.dx
+          dot.y = dot.dy
+        } else {
+          dot.x = dot.x + (dot.dx - dot.x) * 0.1
+          dot.y = dot.y + (dot.dy - dot.y) * 0.1
+        }
+        let last = particles[particlesLength - 1]
+        if (last.x === last.dx && last.y === last.dy) {
+          stop = true
+        }
+        dot.draw()
+      })
+      if (stop) {
+        window.cancelAnimationFrame(timer)
+      } else {
+        timer = window.requestAnimationFrame(animate)
+      }
+    }
+
+    function Dot (x, y, dx, dy, rgba) {
+      this.x = x
+      this.y = y
+      this.dx = dx
+      this.dy = dy
+      this.rgba = rgba
+    }
+
+    Dot.prototype.draw = function () {
+      ctx.fillStyle = `rgba(${this.rgba[0]}, ${this.rgba[1]}, ${this.rgba[2]}, ${this.rgba[3]})`
+      ctx.fillRect(this.x, this.y, 1, 1)
+    }
+
+    draw('Javascript')
+
+  </script>
+</body>
+</html>
