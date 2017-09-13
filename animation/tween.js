@@ -1,133 +1,224 @@
+/*
+ * t : 当前时间   b : 初始值  c : 变化值   d : 总时间
+ * return : 当前的位置
+ *
+*/
+
 export default {
-  /*
-   * t : 当前时间   b : 初始值  c : 变化值   d : 总时间
-   * return : 当前的位置
-   *
-  */
-  linear: function (t, b, c, d) { // 匀速
+  linear (t, b, c, d) {
     return c * t / d + b
   },
-  easeIn: function (t, b, c, d) { // 加速曲线
+  easeInQuad (t, b, c, d) {
     return c * (t /= d) * t + b
   },
-  easeOut: function (t, b, c, d) { // 减速曲线
+  easeOutQuad (t, b, c, d) {
     return -c * (t /= d) * (t - 2) + b
   },
-  easeBoth: function (t, b, c, d) { // 加速减速曲线
+  easeInOutQuad (t, b, c, d) {
     if ((t /= d / 2) < 1) {
       return c / 2 * t * t + b
+    } else {
+      return -c / 2 * ((--t) * (t - 2) - 1) + b
     }
-    return -c / 2 * ((--t) * (t - 2) - 1) + b
   },
-  easeInStrong: function (t, b, c, d) { // 加加速曲线
+  easeInCubic (t, b, c, d) {
+    return c * (t /= d) * t * t + b
+  },
+  easeOutCubic (t, b, c, d) {
+    return c * ((t = t / d - 1) * t * t + 1) + b
+  },
+  easeInOutCubic (t, b, c, d) {
+    if ((t /= d / 2) < 1) {
+      return c / 2 * t * t * t + b
+    } else {
+      return c / 2 * ((t -= 2) * t * t + 2) + b
+    }
+  },
+  easeInQuart (t, b, c, d) {
     return c * (t /= d) * t * t * t + b
   },
-  easeOutStrong: function (t, b, c, d) { // 减减速曲线
+  easeOutQuart (t, b, c, d) {
     return -c * ((t = t / d - 1) * t * t * t - 1) + b
   },
-  easeBothStrong: function (t, b, c, d) { // 加加速减减速曲线
+  easeInOutQuart (t, b, c, d) {
     if ((t /= d / 2) < 1) {
       return c / 2 * t * t * t * t + b
+    } else {
+      return -c / 2 * ((t -= 2) * t * t * t - 2) + b
     }
-    return -c / 2 * ((t -= 2) * t * t * t - 2) + b
   },
-  elasticIn: function (t, b, c, d, a, p) { // 正弦衰减曲线（弹动渐入）
-    if (t === 0) {
-      return b
+  easeInQuint (t, b, c, d) {
+    return c * (t /= d) * t * t * t * t + b
+  },
+  easeOutQuint (t, b, c, d) {
+    return c * ((t = t / d - 1) * t * t * t * t + 1) + b
+  },
+  easeInOutQuint (t, b, c, d) {
+    if ((t /= d / 2) < 1) {
+      return c / 2 * t * t * t * t * t + b
+    } else {
+      return c / 2 * ((t -= 2) * t * t * t * t + 2) + b
     }
-    if ((t /= d) == 1) {
-      return b + c
+  },
+  easeInSine (t, b, c, d) {
+    return -c * Math.cos(t / d * (Math.PI / 2)) + c + b
+  },
+  easeOutSine (t, b, c, d) {
+    return c * Math.sin(t / d * (Math.PI / 2)) + b
+  },
+  easeInOutSine (t, b, c, d) {
+    return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b
+  },
+  easeInExpo (t, b, c, d) {
+    var _ref
+    return (_ref = t === 0) !== null ? _ref : {
+      b: c * Math.pow(2, 10 * (t / d - 1)) + b
+    }
+  },
+  easeOutExpo (t, b, c, d) {
+    var _ref
+    return (_ref = t === d) !== null ? _ref : b + {
+      c: c * (-Math.pow(2, -10 * t / d) + 1) + b
+    }
+  },
+  easeInOutExpo (t, b, c, d) {
+    if (t === 0) {
+    }
+    if (t === d) {
+      b + c
+    }
+    if ((t /= d / 2) < 1) {
+      return c / 2 * Math.pow(2, 10 * (t - 1)) + b
+    } else {
+      return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b
+    }
+  },
+  easeInCirc (t, b, c, d) {
+    return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b
+  },
+  easeOutCirc (t, b, c, d) {
+    return c * Math.sqrt(1 - (t = t / d - 1) * t) + b
+  },
+  easeInOutCirc (t, b, c, d) {
+    if ((t /= d / 2) < 1) {
+      return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b
+    } else {
+      return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b
+    }
+  },
+  easeInElastic (t, b, c, d) {
+    var a, p, s
+    s = 1.70158
+    p = 0
+    a = c
+    if (t === 0) {
+      b
+    } else if ((t /= d) === 1) {
+      b + c
     }
     if (!p) {
       p = d * 0.3
     }
-    if (!a || a < Math.abs(c)) {
+    if (a < Math.abs(c)) {
       a = c
-      let s = p / 4
+      s = p / 4
     } else {
-      let s = p / (2 * Math.PI) * Math.asin(c / a)
+      s = p / (2 * Math.PI) * Math.asin(c / a)
     }
     return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b
   },
-  elasticOut: function (t, b, c, d, a, p) { // 正弦增强曲线（弹动渐出）
+  easeOutElastic (t, b, c, d) {
+    var a, p, s
+    s = 1.70158
+    p = 0
+    a = c
     if (t === 0) {
-      return b
-    }
-    if ((t /= d) == 1) {
-      return b + c
+      b
+    } else if ((t /= d) === 1) {
+      b + c
     }
     if (!p) {
       p = d * 0.3
     }
-    if (!a || a < Math.abs(c)) {
+    if (a < Math.abs(c)) {
       a = c
-      let s = p / 4
+      s = p / 4
     } else {
-      let s = p / (2 * Math.PI) * Math.asin(c / a)
+      s = p / (2 * Math.PI) * Math.asin(c / a)
     }
     return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b
   },
-  elasticBoth: function (t, b, c, d, a, p) {
+  easeInOutElastic (t, b, c, d) {
+    var a, p, s
+    s = 1.70158
+    p = 0
+    a = c
     if (t === 0) {
-      return b
-    }
-    if ((t /= d / 2) == 2) {
-      return b + c
+      b
+    } else if ((t /= d / 2) === 2) {
+      b + c
     }
     if (!p) {
       p = d * (0.3 * 1.5)
     }
-    if (!a || a < Math.abs(c)) {
+    if (a < Math.abs(c)) {
       a = c
-      let s = p / 4
-    }else {
-      let s = p / (2 * Math.PI) * Math.asin(c / a)
+      s = p / 4
+    } else {
+      s = p / (2 * Math.PI) * Math.asin(c / a)
     }
     if (t < 1) {
-      return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) *
-        Math.sin((t * d - s) * (2 * Math.PI) / p)) + b
+      return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b
+    } else {
+      return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * 0.5 + c + b
     }
-    return a * Math.pow(2, -10 * (t -= 1)) *
-      Math.sin((t * d - s) * (2 * Math.PI) / p) * 0.5 + c + b
   },
-  backIn: function (t, b, c, d, s) { // 回退加速（回退渐入）
-    if (typeof s == 'undefined') {
+  easeInBack (t, b, c, d, s) {
+    if (s === void 0) {
       s = 1.70158
     }
     return c * (t /= d) * t * ((s + 1) * t - s) + b
   },
-  backOut: function (t, b, c, d, s) {
-    if (typeof s == 'undefined') {
-      s = 3.70158 // 回缩的距离
+  easeOutBack (t, b, c, d, s) {
+    if (s === void 0) {
+      s = 1.70158
     }
     return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b
   },
-  backBoth: function (t, b, c, d, s) {
-    if (typeof s == 'undefined') {
+  easeInOutBack (t, b, c, d, s) {
+    if (s === void 0) {
       s = 1.70158
     }
     if ((t /= d / 2) < 1) {
-      return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b
+      return c / 2 * (t * t * (((s *= 1.525) + 1) * t - s)) + b
+    } else {
+      return c / 2 * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b
     }
-    return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b
   },
-  bounceIn: function (t, b, c, d) { // 弹球减振（弹球渐出）
-    return c - Tween['bounceOut'](d - t, 0, c, d) + b
+  easeInBounce (t, b, c, d) {
+    var v
+    v = Easing.easeOutBounce(d - t, 0, c, d)
+    return c - v + b
   },
-  bounceOut: function (t, b, c, d) {
-    if ((t /= d) < (1 / 2.75)) {
+  easeOutBounce (t, b, c, d) {
+    if ((t /= d) < 1 / 2.75) {
       return c * (7.5625 * t * t) + b
-    } else if (t < (2 / 2.75)) {
-      return c * (7.5625 * (t -= (1.5 / 2.75)) * t + 0.75) + b
-    } else if (t < (2.5 / 2.75)) {
-      return c * (7.5625 * (t -= (2.25 / 2.75)) * t + 0.9375) + b
+    } else if (t < 2 / 2.75) {
+      return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b
+    } else if (t < 2.5 / 2.75) {
+      return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b
+    } else {
+      return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b
     }
-    return c * (7.5625 * (t -= (2.625 / 2.75)) * t + 0.984375) + b
   },
-  bounceBoth: function (t, b, c, d) {
+  easeInOutBounce (t, b, c, d) {
+    var v
     if (t < d / 2) {
-      return Tween['bounceIn'](t * 2, 0, c, d) * 0.5 + b
+      v = Easing.easeInBounce(t * 2, 0, c, d)
+      return v * 0.5 + b
+    } else {
+      v = Easing.easeOutBounce(t * 2 - d, 0, c, d)
+      return v * 0.5 + c * 0.5 + b
     }
-    return Tween['bounceOut'](t * 2 - d, 0, c, d) * 0.5 + c * 0.5 + b
   }
 }
