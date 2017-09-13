@@ -1,4 +1,4 @@
-module.exports = {
+﻿module.exports = {
   'extends': 'standard',
   'plugins': [
     'standard',

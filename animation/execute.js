@@ -1,4 +1,4 @@
-import Tween from './tween.js'
+﻿import Tween from '../common/tween.js'
 
 export default execute
 

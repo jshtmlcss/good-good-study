@@ -1,17 +1,46 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>粒子系统</title>
+  <style>
+    body {
+      background-color: #000;
+    }
+  </style>
 </head>
 <body>
     <canvas id="canvas" width="1000" height="500" style="width: 500px; height: 250px; display: block; margin: 100px auto;"></canvas>
     <script type="module">
-      import { Text } from './particle.js'
-      let text = new Text('#canvas')
-      text.draw('Javascript')
+      import { Text, Picture } from './particle.js'
+      window.text = new Text('#canvas')
+      text.particle.grid = 6
+      text.draw({
+        text: 'Javascript',
+        fillStyle: '#fff',
+        font: '200px 微软雅黑 bold'
+      }).animate({
+        type: 'easeOutBack',
+        dotWidth: 3,
+        dotHeight: 3
+      })
+      // window.picture = new Picture('#canvas')
+      // picture.particle.grid = 4
+      // // 绘制图片到canvas
+      // picture.draw('./lang.png')
+      // // 图片加载完成执行动画
+      // picture.observer.on('loaded', () => {
+      //   picture.animate({
+      //     type: 'easeOutBack',
+      //     dotWidth: 2,
+      //     dotHeight: 2,
+      //     speed: 5,
+      //     dotX: picture.image.width / 2,
+      //     dotY: picture.image.height
+      //   })
+      // })
     </script>
 </body>
 </html>
