@@ -14,6 +14,9 @@ export default {
   easeOutQuad (t, b, c, d) {
     return -c * (t /= d) * (t - 2) + b
   },
+  easeOutStrong: function (t, b, c, d) {
+    return -c * ((t = t / d - 1) * t * t * t - 1) + b
+  },
   easeInOutQuad (t, b, c, d) {
     if ((t /= d / 2) < 1) {
       return c / 2 * t * t + b
