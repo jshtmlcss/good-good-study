@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>烟花</title>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    // 	get canvas element
+    var canvas = document.getElementById('canvas');
+    //	get context
+    var ctx = canvas.getContext('2d');
+
+    //	set canvas size
+    canvas.width = 500;
+    canvas.height = 240;
+
+    var i,//points num per seconds
+      elem,// 
+      a = [];// all points storage
+    setInterval(function () {
+      ctx.fillStyle = 'rgba(0,0,0,.3)';
+      // fill canvas
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // 		put points into array
+      i = 10;
+      while (i--) {
+        a.push({
+          x: canvas.width / 2,
+          y: canvas.height / 6,
+          r: Math.random() * 3,
+          // points' color			
+          c: "rgb(" + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + "," + Math.floor(Math.random() * 255) + ")",
+          vx: Math.random() * 10 - 5,
+          vy: Math.random() * -5
+        });
+      }
+
+      for (i = a.length - 1; i >= 0; i--) {
+        elem = a[i];
+        ctx.beginPath();
+        ctx.fillStyle = elem.c;
+        ctx.arc(elem.x, elem.y, elem.r, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.closePath();
+        elem.x += elem.vx;
+        elem.y += elem.vy;
+        elem.vy += .1;
+        elem.r -= .01;
+        if (elem.y > canvas.height) {
+          elem.vy *= -.5;
+          elem.y = canvas.height;
+          elem.r += .005;
+        }
+        elem.r < 0 && a.splice(i, 1);
+      }
+    }, 17);
+  </script>
+</body>
+
+</html>
