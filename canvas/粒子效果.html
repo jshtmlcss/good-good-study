@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>粒子效果</title>
+  <style>
+    body {
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+    <canvas id="canvas" width="1000" height="1000" style="width: 500px; height: 500px; display: block; margin: 50px auto;"></canvas>
+    <div style="width: 500px; margin: 0 auto; text-align: center;">
+      <input id="textInput" type="text" value="Hello Word" />
+      <button onclick="changeText(textInput.value)">go</button>
+      <br />
+      <br />
+      <button onclick="toggle()">显示/隐藏</button>
+    </div>
+
+    <script type="module">
+      import { Text, Picture } from './particle.js'
+      window.cur = null
+      
+      window.text = new Text('#canvas')
+      window.changeText = changeText
+  
+      function changeText (value) {
+        text.draw({
+          text: value,
+          fillStyle: '#ccc',
+          font: '180px 微软雅黑 bold',
+        }).animate({
+          gridX: 6,
+          gridY: 6,
+          dotWidth: 3,
+          dotHeight: 3
+        }, {
+          type: 'easeOutBack',
+          // end () {
+          //   console.log('end')
+          // }
+        })
+        cur = 'text'
+      }
+
+      window.picture = new Picture('#canvas')
+      
+      function changePicture (src) {
+        // 绘制图片到canvas
+        picture.draw({
+          src,
+          x: (picture.el.width - 512) / 2,
+          y: 0
+        })
+        // 图片加载完成执行动画
+        picture.observer.on('loaded', () => {
+          picture.animate({
+            dotWidth: 2,
+            dotHeight: 2
+          }, {
+            // type: 'easeInOutBounce',
+            speed: 5
+          })
+        })
+        cur = 'picture'
+      }
+
+      // changeText(textInput.value)
+      changePicture('./chrome.png')
+    </script>
+    <script>
+      let status = false
+      function toggle () {
+        let that = window[cur]
+        if (status) {
+          that.particle.resetProps(dot => {
+            dot.dx = dot.initX
+            dot.dy = dot.initY
+            dot.initX = dot.x
+            dot.initY = dot.y
+          })
+        } else {
+          that.particle.resetProps(dot => {
+            dot.initX = dot.dx
+            dot.initY = dot.dy
+            dot.dx = that.el.width / 2
+            dot.dy = that.el.height
+          })
+        }
+        that.animation.execute()
+        status = !status
+      }
+    </script>
+</body>
+</html>
