@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>角度</title>
+  <style>
+    #canvas {
+      display: block;
+      margin: 10px auto;
+      border: 1px solid #000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    class Arrow {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.w = 60
+        this.h = 30
+        this.rotation = 0
+        this.fillStyle = 'rgb(57, 119, 224)'
+        this.strokeStyle = 'rgba(0, 0, 0, 0)'
+        Object.assign(this, props)
+        return this
+      }
+      createPath (ctx) {
+        let { w, h } = this
+        ctx.beginPath()
+        ctx.moveTo(-w/2, -h/2)
+        ctx.lineTo(w/10, -h/2)
+        ctx.lineTo(w/10, -h)
+        ctx.lineTo(w/2, 0)
+        ctx.lineTo(w/10, h)
+        ctx.lineTo(w/10, h/2)
+        ctx.lineTo(-w/2, h/2)
+        ctx.closePath()
+        return this
+      }
+      render (ctx) {
+        let { x, y, fillStyle, strokeStyle, rotation } = this
+        
+        ctx.save()
+        ctx.fillStyle = fillStyle
+        ctx.strokeStyle = strokeStyle
+        ctx.translate(x, y)        
+        ctx.rotate(rotation)
+        this.createPath(ctx)
+        ctx.fill()
+        ctx.stroke()
+        ctx.restore()
+        
+        return this
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let width = canvas.width = 800
+    let height = canvas.height = 600
+    let ctx = canvas.getContext('2d')
+    
+    const arrow = new Arrow({
+      x: width / 2,
+      y: height / 2,
+      w: 180,
+      h: 60
+    }).render(ctx)
+    canvas.onmousemove = function (e) {
+      let { pageX, pageY } = e
+      let { left, top } = canvas.getBoundingClientRect()
+      let x = pageX - left
+      let y = pageY - top
+      let dx = x - arrow.x
+      let dy = y - arrow.y
+      ctx.clearRect(0, 0, width, height)
+      arrow.rotation = Math.atan2(dy, dx)
+      arrow.render(ctx)
+    }
+  </script>
+</body>
+</html>

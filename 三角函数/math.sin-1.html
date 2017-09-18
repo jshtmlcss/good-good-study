@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Math.sin</title>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500"></canvas>
+  <script>
+    class Ball {
+      constructor (raidus = 40, color = '#ff0000') {
+        this.raidus = raidus
+        this.color = color
+        this.x = 0
+        this.y = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = color
+        this.lineWidth = 1
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.raidus, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let ball = new Ball()
+    let angle = 0
+    let range = 50
+    let speedY = 0.05
+    let speedX = 1
+    ball.x = canvas.width / 2
+    ball.y = canvas.height / 2
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      ball.y = canvas.height / 2 + Math.sin(angle) * range
+      ball.x += speedX
+      angle += speedY
+      ball.draw(ctx)
+    }());
+  </script>
+</body>
+</html>
