@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>画板</title>
+</head>
+<body>
+  <canvas id="canvas" style="float: left; border: 1px solid #000;" width="1000" height="500"></canvas>
+  <div class="actions" style="float: left">
+      <button onclick="curAction = 'lineDraw'">画线</button>
+      <button onclick="curAction = 'sprayPaint'">喷漆</button>
+    </div>
+  <script type="module">
+    import { parseColor } from '../common/utils.js'
+
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let { top: offsetTop, left: offsetLeft } = canvas.getBoundingClientRect()
+
+    // 画布对象
+    const canvasObj = {
+      init () {
+        canvas.addEventListener('mousedown', this)
+        canvas.addEventListener('mousemove', this)
+        canvas.addEventListener('mouseup', this)
+      },
+      handleEvent (e) {
+        switch (e.type) {
+          case 'mousedown':
+            actions[curAction].mousedown(e)
+            break
+          case 'mousemove':
+            actions[curAction].mousemove(e)
+            break  
+          case 'mouseup':
+            actions[curAction].mouseup(e)
+            break  
+        }
+      }
+    }
+
+    // 画布相关操作
+    const actions = {
+      // 画线
+      lineDraw: {
+        disabledMove: true,
+        mousedown (e) {
+          let { mouseX, mouseY } = getMousePoint(e)
+          ctx.beginPath()
+          ctx.moveTo(mouseX, mouseY)
+          this.disabledMove = false
+        },
+        mousemove (e) {
+          if (this.disabledMove) return
+          let { mouseX, mouseY } = getMousePoint(e)
+          ctx.lineTo(mouseX, mouseY)
+          // ctx.quadraticCurveTo(mouseX, mouseY, 40, 200)
+          ctx.stroke()
+        },
+        mouseup () {
+          this.disabledMove = true
+        }
+      },
+      // 喷漆
+      sprayPaint: {
+        disabledMove: true,
+        brushSize: 25,
+        brushDensity: 50,
+        brushColor: null,
+        mousedown (e) {
+          // 获取颜色
+          this.brushColor = parseColor(Math.random() * 0xffffff, true)
+          this.imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          this.pixels = this.imageData.data
+          this.disabledMove = false
+        },
+        mousemove (e) {
+          if (this.disabledMove) return
+          for (let i = 0; i < this.brushDensity; i++) {
+            let { mouseX, mouseY } = getMousePoint(e)
+            // 随机弧度
+            let angle = Math.random() * Math.PI * 2
+            // 圆的范围大小
+            let radius = Math.random() * this.brushSize
+            // 利用cos sin让坐标x,y的值围绕圆形
+            let xpos = (mouseX + Math.cos(angle) * radius) | 0
+            let ypos = (mouseY + Math.sin(angle) * radius) | 0
+            // 获取当前鼠标移动坐标所在的像素点的位置
+            let offset = (xpos + ypos * this.imageData.width) * 4
+
+            //set the color of a pixel using its component colors: r,g,b,a (0-255)
+            this.pixels[offset]     = this.brushColor >> 16 & 0xff //red
+            this.pixels[offset + 1] = this.brushColor >> 8 & 0xff  //green
+            this.pixels[offset + 2] = this.brushColor & 0xff       //blue
+            this.pixels[offset + 3] = 255                      //alpha
+          }
+
+          ctx.putImageData(this.imageData, 0, 0)
+        },
+        mouseup () {
+          this.disabledMove = true
+        }
+      }
+    }
+
+    function getMousePoint (e) {
+      let { pageX, pageY } = e
+      let mouseX = pageX - offsetLeft
+      let mouseY = pageY - offsetTop
+      return { mouseX, mouseY }
+    }
+
+    window.curAction = 'lineDraw'
+
+    canvasObj.init()
+
+  </script>
+</body>
+</html>

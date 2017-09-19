@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>像素-图片灰度效果</title>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let image = new Image()
+    image.onload = change
+    image.src = './chrome.png'
+
+    function change () {
+      canvas.width = image.width
+      canvas.height = image.height
+      ctx.drawImage(image, 0, 0)
+      let imageData = ctx.getImageData(0, 0, image.width, image.height)
+      let pixels = imageData.data
+      let len = pixels.length
+      for (i = 0; i < len; i+=4) {
+        let r = pixels[i]
+        let g = pixels[i + 1]
+        let b = pixels[i + 2]
+        // 公式由国际照明委员会定义，直接套用即可
+        let y = (0.2126 * r) + (0.715 * g) + (0.072 * b)
+        pixels[i] = pixels[i + 1] = pixels[i + 2] = y
+      }
+      ctx.putImageData(imageData, 0, 0)
+    }
+  </script>
+</body>
+</html>
