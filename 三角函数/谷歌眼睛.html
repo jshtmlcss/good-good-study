@@ -1,0 +1,82 @@
+﻿<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>谷歌眼睛</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .background {
+      width: 176px;
+      height: 91px;
+      background: url(google.png) no-repeat;
+      position: absolute;
+      left: 30%;
+      top: 30%;
+    }
+
+    .left {
+      border: 2px #000 solid;
+      position: absolute;
+      left: 115px;
+      top: 43px;
+      border-radius: 50%
+    }
+
+    .right {
+      border: 2px #000 solid;
+      position: absolute;
+      left: 135px;
+      top: 43px;
+      border-radius: 50%
+    }
+  </style>
+</head>
+
+<body>
+  <div class="background">
+    <div class="left"></div>
+    <div class="right"></div>
+  </div>
+  <script>
+    let leftElem = document.querySelector('.left')
+    let rightElem = document.querySelector('.right')
+    // 半径
+    let radius = 5
+
+    leftElem._offset = getOffset(leftElem)
+    rightElem._offset = getOffset(rightElem)
+
+    document.addEventListener('mousemove', onmousemove)
+
+    function onmousemove (e) {
+      calculate(e, leftElem)
+      calculate(e, rightElem)
+    }
+
+    function getOffset (elem) {
+      return { top: elem.offsetTop, left: elem.offsetLeft }
+    }
+
+    // 鼠标坐标和眼睛之间的换算
+    function calculate (e, elem) {
+      let { pageX, pageY } = e
+      let { left, top } = elem.getBoundingClientRect()
+      let x = pageX - left
+      let y = pageY - top
+      // 以眼睛为坐标原点，获取鼠标到眼睛之间夹角的弧度
+      let radians = Math.atan2(y, x)
+      // 夹角的角度
+      console.log(radians * 180 / Math.PI)
+      // 通过Math.cos/Math.sin * radius求出对应边长，对应x y轴的值
+      elem.style.left = elem._offset.left + Math.cos(radians) * radius + 'px'
+      elem.style.top = elem._offset.top + Math.sin(radians) * radius + 'px'
+    }
+  </script>
+</body>
+
+</html>

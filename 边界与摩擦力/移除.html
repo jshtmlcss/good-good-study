@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>移除</title>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    class Ball {
+      constructor (props) {
+        this.radius = 40
+        this.color = '#ff0000'
+        this.x = 0
+        this.y = 0
+        this.vx = 0
+        this.vy = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.lineWidth = 1
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let width = canvas.width = 1000
+    let height = canvas.height = 500
+    let ctx = canvas.getContext('2d')
+    let balls = []
+    let ballsLength = 10
+
+    function createBall () {
+      for (let i = 0; i < ballsLength; i ++) {
+        let ball = new Ball()
+        ball.x = Math.random() * width 
+        ball.y = Math.random() * height
+        ball.vx = Math.random() * 2 - 1
+        ball.vy = Math.random() * 2 - 1
+        ball.radius = 20
+        balls.push(ball)
+      }
+    }
+
+    function draw (ball, index) {
+      ball.x += ball.vx
+      ball.y += ball.vy
+      if (
+        ball.x - ball.radius > width ||
+        ball.x + ball.radius < 0 ||
+        ball.y - ball.radius > height ||
+        ball.y + ball.radius < 0
+      ) {
+        balls.splice(index, 1)
+        if (balls.length) {
+          console.log(`移除`, index)
+        } else {
+          console.log('所有移除完毕')
+        }
+      }
+      ball.draw(ctx)
+    }
+
+    createBall()
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      let ballsLength = balls.length
+      while (ballsLength--) {
+        draw(balls[ballsLength], ballsLength)
+      }
+    }());
+  </script>
+</body>
+</html>

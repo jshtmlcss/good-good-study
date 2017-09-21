@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>双轴重力加速度-1</title>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500"></canvas>
+  <script>
+    class Ball {
+      constructor (radius = 40, color = '#ff0000') {
+        this.radius = radius
+        this.color = color
+        this.x = 0
+        this.y = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = color
+        this.lineWidth = 1
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let ball = new Ball()
+    let vx = 0 // 速度
+    let vy = 0 // 速度
+    let ax = 0 // 加速度
+    let ay = 0 // 加速度
+    let gravity = 0.03 // 重力
+    ball.x = ball.radius
+    ball.y = canvas.height / 2
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      vx += ax // 速度增加
+      vy += ay // 速度增加
+      vy += gravity // 添加重力
+      ball.x += vx
+      ball.y += vy
+
+      // 判断是否到达边界
+      if (ball.x + vx > canvas.width - ball.radius) {
+        vx = 0
+        ball.x = canvas.width - ball.radius
+      }
+      else if (ball.x + vx < ball.radius) {
+        vx = 0
+        ball.x = ball.radius
+      }
+      if (ball.y + vy > canvas.height - ball.radius) {
+        vy = 0
+        ball.y = canvas.height - ball.radius
+      }
+      else if (ball.y + vy < ball.radius) {
+        vy = 0
+        ball.y = ball.radius
+      }
+      ball.draw(ctx)
+    }());
+
+    window.addEventListener('keydown', keydown)
+    window.addEventListener('keyup', keyup)
+
+    function keydown (e) {
+      switch (e.keyCode) {
+        case 37: // 左键
+          ax = -0.1
+          break
+        case 39: // 右键
+          ax = 0.1
+          break
+        case 40: // 下键
+          ay = 0.1
+          break
+        case 38: // 上键
+          ay = -0.1
+          break
+      }
+    }
+
+    function keyup () {
+      ax = 0
+      ay = 0
+    }
+  </script>
+</body>
+</html>

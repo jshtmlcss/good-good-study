@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>单轴加速度-1</title>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500"></canvas>
+  <script>
+    class Ball {
+      constructor (radius = 40, color = '#ff0000') {
+        this.radius = radius
+        this.color = color
+        this.x = 0
+        this.y = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = color
+        this.lineWidth = 1
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let ball = new Ball()
+    let vx = 0
+    let ax = 0.1
+    ball.x = 0
+    ball.y = canvas.height / 2
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      vx += ax
+      ball.x += vx
+      ball.draw(ctx)
+    }());
+  </script>
+</body>
+</html>
