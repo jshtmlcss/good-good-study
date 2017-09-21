@@ -10,8 +10,8 @@
   <canvas id="canvas" width="1000" height="500"></canvas>
   <script>
     class Ball {
-      constructor (raidus = 40, color = '#ff0000') {
-        this.raidus = raidus
+      constructor (radius = 40, color = '#ff0000') {
+        this.radius = radius
         this.color = color
         this.x = 0
         this.y = 0
@@ -29,7 +29,7 @@
         ctx.lineWidth = this.lineWidth
         ctx.fillStyle = this.color
         ctx.beginPath()
-        ctx.arc(0, 0, this.raidus, 0, (Math.PI * 2), true)
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
         ctx.closePath()
         ctx.fill()
         if (this.lineWidth > 0) {
