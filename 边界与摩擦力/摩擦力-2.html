@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>双轴重力加速度-1</title>
+  <title>摩擦力-2</title>
 </head>
 <body>
-  <canvas id="canvas" width="1000" height="500" style="border: 1px solid #000"></canvas>
+  <canvas id="canvas" width="1000" height="500"></canvas>
   <script>
     class Ball {
       constructor (radius = 40, color = '#ff0000') {
@@ -43,67 +43,32 @@
     let canvas = document.getElementById('canvas')
     let ctx = canvas.getContext('2d')
     let ball = new Ball()
-    let vx = 0 // 速度
-    let vy = 0 // 速度
-    let ax = 0 // 加速度
-    let ay = 0 // 加速度
-    let gravity = 0.03 // 重力
-    ball.x = ball.radius
+    let vx = Math.random() * 10 - 5
+    let vy = Math.random() * 10 - 5
+    let friotion = 0.1
+    ball.x = canvas.width / 2
     ball.y = canvas.height / 2
 
     ;(function drawFrame() {
       window.requestAnimationFrame(drawFrame)
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      vx += ax // 速度增加
-      vy += ay // 速度增加
-      vy += gravity // 添加重力
+      // 通过勾股定理求速度
+      let speed = Math.sqrt(vx * vx + vy * vy)
+      // 获得弧度
+      let radians = Math.atan2(vy, vx)
+      // 从速度中减去摩擦力，摩擦力大于速度则速度为0
+      if (speed > friotion) {
+        speed -= friotion
+      } else {
+        speed = 0
+      }
+      // 再通过正余弦函数将角速度转换回vx vy
+      vx = Math.cos(radians) * speed
+      vy = Math.sin(radians) * speed
       ball.x += vx
       ball.y += vy
-
-      // 判断是否到达边界
-      if (ball.x + ball.radius > canvas.width) {
-        vx = 0
-        ball.x = canvas.width - ball.radius
-      }
-      else if (ball.x - ball.radius < 0) {
-        vx = 0
-        ball.x = ball.radius
-      }
-      if (ball.y + ball.radius > canvas.height) {
-        vy = 0
-        ball.y = canvas.height - ball.radius
-      }
-      else if (ball.y - ball.radius < 0) {
-        vy = 0
-        ball.y = ball.radius
-      }
       ball.draw(ctx)
     }());
-
-    window.addEventListener('keydown', keydown)
-    window.addEventListener('keyup', keyup)
-
-    function keydown (e) {
-      switch (e.keyCode) {
-        case 37: // 左键
-          ax = -0.1
-          break
-        case 39: // 右键
-          ax = 0.1
-          break
-        case 40: // 下键
-          ay = 0.1
-          break
-        case 38: // 上键
-          ay = -0.1
-          break
-      }
-    }
-
-    function keyup () {
-      ax = 0
-      ay = 0
-    }
   </script>
 </body>
 </html>

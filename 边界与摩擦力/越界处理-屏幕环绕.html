@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>屏幕环绕</title>
+</head>
+
+<body>
+  <canvas id="canvas" style="border: 1px solid #000; background: #000;"></canvas>
+  <script>
+    class Ship {
+      constructor () {
+        this.x = 0
+        this.y = 0
+        this.width = 25
+        this.height = 20
+        this.rotation = 0
+        this.showFlame = false
+      }
+      draw (context) {
+        context.save()
+        context.translate(this.x, this.y)
+        context.rotate(this.rotation)
+
+        context.lineWidth = 1
+        context.strokeStyle = "#ffffff"
+        context.beginPath()
+        context.moveTo(10, 0)
+        context.lineTo(-10, 10)
+        context.lineTo(-5, 0)
+        context.lineTo(-10, -10)
+        context.lineTo(10, 0)
+        context.stroke()
+
+        if (this.showFlame) {
+          context.beginPath()
+          context.moveTo(-7.5, -5)
+          context.lineTo(-15, 0)
+          context.lineTo(-7.5, 5)
+          context.stroke()
+        }
+        context.restore()
+      }
+    }
+  </script>
+  <script>
+    (function () {
+      let canvas = document.getElementById('canvas')
+      let width = canvas.width = 800
+      let height = canvas.height = 500
+      let ctx = canvas.getContext('2d')
+      let ship = new Ship()
+      let vr = 0
+      let vx = 0
+      let vy = 0
+      let thrust = 0
+      let left = 0
+      let right = width
+      let top = 0
+      let bottom = height
+      ship.x = width / 2
+      ship.y = height / 2
+
+      ;(function drawFrame () {
+        window.requestAnimationFrame(drawFrame)
+        ctx.clearRect(0, 0, width, height)
+        // 旋转弧度计算
+        ship.rotation += vr * Math.PI / 180
+        // 将角加速度分解为x, y轴加速度
+        let ax = Math.cos(ship.rotation) * thrust
+        let ay = Math.sin(ship.rotation) * thrust
+        // 加速度加入速度向量
+        vx += ax
+        vy += ay
+        ship.x += vx
+        ship.y += vy
+
+        // 边界判断
+        if (ship.x - ship.width / 2 > right) {
+          ship.x = left - ship.width / 2
+        } else if (ship.x + ship.width / 2 < left) {
+          ship.x = right + ship.width / 2
+        }
+        if (ship.y - ship.height / 2 > bottom) {
+          ship.y = top - ship.height / 2
+        } else if (ship.y + ship.height / 2 < top) {
+          ship.y = bottom + ship.height / 2
+        }
+        ship.draw(ctx)
+      })();
+
+      window.addEventListener('keydown', keyDown)
+      window.addEventListener('keyup', keyup)
+
+      function keyDown (e) {
+        switch (e.keyCode) {
+          case 37: // 左键
+            vr = -3
+            break
+          case 39: // 右键
+            vr = 3
+            break
+          case 40: // 下键
+            break
+          case 38: // 上键
+            thrust = 0.02
+            ship.showFlame = true
+            break
+        }
+      }
+
+      function keyup () {
+        vr = 0
+        thrust = 0
+        ship.showFlame = false
+      }
+    })()
+  </script>
+</body>
+
+</html>

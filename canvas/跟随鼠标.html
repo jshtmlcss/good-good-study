@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>角度</title>
+  <style>
+    #canvas {
+      display: block;
+      margin: 10px auto;
+      border: 1px solid #000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    class Arrow {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.w = 60
+        this.h = 30
+        this.rotation = 0
+        this.fillStyle = 'rgb(57, 119, 224)'
+        this.strokeStyle = 'rgba(0, 0, 0, 0)'
+        Object.assign(this, props)
+        return this
+      }
+      createPath (ctx) {
+        let { w, h } = this
+        ctx.beginPath()
+        ctx.moveTo(-w/2, -h/2)
+        ctx.lineTo(w/10, -h/2)
+        ctx.lineTo(w/10, -h)
+        ctx.lineTo(w/2, 0)
+        ctx.lineTo(w/10, h)
+        ctx.lineTo(w/10, h/2)
+        ctx.lineTo(-w/2, h/2)
+        ctx.closePath()
+        return this
+      }
+      render (ctx) {
+        let { x, y, fillStyle, strokeStyle, rotation } = this
+        
+        ctx.save()
+        ctx.fillStyle = fillStyle
+        ctx.strokeStyle = strokeStyle
+        ctx.translate(x, y)        
+        ctx.rotate(rotation)
+        this.createPath(ctx)
+        ctx.fill()
+        ctx.stroke()
+        ctx.restore()
+        
+        return this
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let width = canvas.width = 800
+    let height = canvas.height = 600
+    let ctx = canvas.getContext('2d')
+    let { top: offsetTop, left: offsetLeft } = canvas.getBoundingClientRect()
+    let mouse = { x: width / 2, y: height / 2 }
+
+    const arrow = new Arrow({
+      x: width / 2,
+      y: height / 2,
+      w: 180,
+      h: 60
+    }).render(ctx)
+
+    canvas.onmousemove = function (e) {
+      mouse = getMousePoint(e)
+    }
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+
+      let { x, y } = mouse
+      let dx = x - arrow.x
+      let dy = y - arrow.y
+      let radians = Math.atan2(dy, dx)
+
+      // 方法一
+      let vx = x + (arrow.x - x) * .98
+      let vy = y + (arrow.y - y) * .98
+      arrow.rotation = radians
+      arrow.x = vx
+      arrow.y = vy
+
+      // 方法二
+      // let speed = 5
+      // let vx = Math.cos(radians) * speed
+      // let vy = Math.sin(radians) * speed
+      // arrow.rotation = radians
+      // arrow.x += vx
+      // arrow.y += vy
+
+      arrow.render(ctx)
+    })();
+
+    function getMousePoint (e) {
+      let { pageX, pageY } = e
+      let x = pageX - offsetLeft
+      let y = pageY - offsetTop
+      return { x, y }
+    }
+  </script>
+</body>
+</html>
