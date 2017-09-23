@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>弹动-链式-1</title>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500" style="border: 1px solid #000;"></canvas>
+  <script>
+    class Ball {
+      constructor (props) {
+        this.radius = 40
+        this.color = '#ff0000'
+        this.x = 0
+        this.y = 0
+        this.vx = 0
+        this.vy = 0
+        this.ax = 0
+        this.ay = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.lineWidth = 1
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+      // 返回小球的边界
+      getBounds () {
+        return {
+          x: this.x - this.radius,
+          y: this.y - this.radius,
+          width: this.radius * 2,
+          height: this.radius * 2
+        }
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let spring = 0.03
+    let friction = 0.9
+    let gravity = 2
+    let mouse = { x: canvas.width / 2, y: 0 }
+    let balls = createBalls(5)
+
+    canvas.addEventListener('mousemove', mousemove)
+
+    function createBalls (nums) {
+      let items = []
+      for (let i = 0; i < nums; i++) {
+        let ball = new Ball()
+        ball.vx = ball.vy = 1
+        ball.radius = 10
+        items.push(ball)
+      }
+      return items
+    }
+
+    function mousemove (e) {
+      mouse = { x: e.offsetX, y: e.offsetY }
+    }
+
+    function move (ball, targetX, targetY) {
+      ball.vx += (targetX - ball.x) * spring
+      ball.vx *= friction
+
+      ball.vy += (targetY - ball.y) * spring
+      ball.vy += gravity
+      ball.vy *= friction
+
+      ball.x += ball.vx
+      ball.y += ball.vy
+    }
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      ctx.beginPath()
+      ctx.moveTo(mouse.x, mouse.y)
+      balls.forEach(ball => {
+        ctx.lineTo(ball.x, ball.y)
+      })
+      ctx.stroke()
+
+      balls.forEach((ball, index) => {
+        let { x, y } = mouse
+        if (index !== 0) {
+          x = balls[index - 1].x
+          y = balls[index - 1].y
+        }
+        move(ball, x, y)
+        ball.draw(ctx)
+      })
+    }());
+  </script>
+</body>
+</html>

@@ -4,21 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Math.sin</title>
+  <title>弹动-1</title>
 </head>
 <body>
-  <canvas id="canvas" width="1000" height="500"></canvas>
+  <canvas id="canvas" width="1000" height="500" style="border: 1px solid #000;"></canvas>
   <script>
     class Ball {
-      constructor (radius = 40, color = '#ff0000') {
-        this.radius = radius
-        this.color = color
+      constructor (props) {
+        this.radius = 40
+        this.color = '#ff0000'
         this.x = 0
         this.y = 0
+        this.vx = 0
+        this.vy = 0
+        this.ax = 0
+        this.ay = 0
         this.rotation = 0
         this.scaleX = 1
         this.scaleY = 1
         this.lineWidth = 1
+        Object.assign(this, props)
       }
       draw (ctx) {
         ctx.save()
@@ -36,25 +41,38 @@
         }
         ctx.restore()
       }
+      // 返回小球的边界
+      getBounds () {
+        return {
+          x: this.x - this.radius,
+          y: this.y - this.radius,
+          width: this.radius * 2,
+          height: this.radius * 2
+        }
+      }
     }
   </script>
   <script>
     let canvas = document.getElementById('canvas')
     let ctx = canvas.getContext('2d')
     let ball = new Ball()
-    let angle = 0
-    let range = 50
-    let speedY = 0.05
-    let speedX = 1
-    ball.x = canvas.width / 2
+    let spring = 0.01
+    let targetX = canvas.width / 2
+
+    // 初始坐标
+    ball.x = 0
     ball.y = canvas.height / 2
+
     ;(function drawFrame() {
       window.requestAnimationFrame(drawFrame)
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      ball.y = canvas.height / 2 + Math.sin(angle) * range
-      ball.x += speedX
-      angle += speedY
+      let dx = targetX - ball.x
+      let ax = dx * spring
+
+      ball.vx += ax
+      ball.x += ball.vx
+
       ball.draw(ctx)
     }());
   </script>
