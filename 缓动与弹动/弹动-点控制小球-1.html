@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>弹动-点控制小球-1</title>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500" style="border: 1px solid #000;"></canvas>
+  <script>
+    class Ball {
+      constructor (props) {
+        this.radius = 40
+        this.color = '#ff0000'
+        this.x = 0
+        this.y = 0
+        this.vx = 0
+        this.vy = 0
+        this.ax = 0
+        this.ay = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.lineWidth = 1
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+      // 返回小球的边界
+      getBounds () {
+        return {
+          x: this.x - this.radius,
+          y: this.y - this.radius,
+          width: this.radius * 2,
+          height: this.radius * 2
+        }
+      }
+    }
+  </script>
+  <script type="module">
+    import { containsPoint } from '../common/utils.js'
+
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let spring = 0.03
+    let friction = 0.9
+    let handles = createHandle(5)
+    let curHandle = null
+    let ball = new Ball({ radius: 20, x: Math.random() * canvas.width, y: Math.random() * canvas.height })
+
+    canvas.addEventListener('mousedown', mousedown)
+
+    // 创建点
+    function createHandle (nums) {
+      let items = []
+      while (nums--) {
+        items.push(new Ball({ radius: 10, color: '#ccc', x: Math.random() * canvas.width, y: Math.random() * canvas.height }))
+      }
+      return items
+    }
+
+    // 绘制点
+    function drawHandle () {
+      handles.forEach((handle, index) => {
+        ctx.moveTo(ball.x, ball.y)
+        ctx.lineTo(handle.x, handle.y)
+        ctx.stroke()
+        handle.draw(ctx)
+      })
+    }
+
+    function mousedown (e) {
+      handles.forEach(handle => {
+        // containsPoint 方法负责判断鼠标是否点击了小球
+        if (containsPoint(handle.getBounds(), e.offsetX, e.offsetY)) {
+          curHandle = handle
+
+          // 记录按下时鼠标的坐标，在mousemove的时候需要减去这个坐标
+          handle.startX = e.offsetX
+          handle.startY = e.offsetY
+
+          // 记录按下时小球的坐标
+          handle.oldX = handle.x
+          handle.oldY = handle.y
+        }
+      })
+      canvas.addEventListener('mousemove', mousemove)
+      canvas.addEventListener('mouseup', mouseup)
+    }
+
+    function mousemove (e) {
+      if (!curHandle) return
+      // 移动的坐标减去按下的坐标得到鼠标移动的偏移量
+      curHandle.x += (e.offsetX - curHandle.startX)
+      curHandle.y += (e.offsetY - curHandle.startY)
+      curHandle.startX = e.offsetX
+      curHandle.startY = e.offsetY
+    }
+
+    function mouseup () {
+      curHandle = null
+      canvas.removeEventListener('mousemove', mousemove)
+      canvas.removeEventListener('mouseup', mouseup)
+    }
+
+    // 计算小球的速度
+    function applyHandle (handle) {
+      let dx = handle.x - ball.x
+      let dy = handle.y - ball.y
+      ball.vx += dx * spring
+      ball.vy += dy * spring
+    }
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.beginPath()
+
+      drawHandle()
+
+      // 让小球的位置受三个点的影响
+      handles.forEach(applyHandle)
+
+      // applyHandle(handles[0])
+      // applyHandle(handles[1])
+
+      ball.vy *= friction
+      ball.vx *= friction
+
+      ball.x += ball.vx
+      ball.y += ball.vy
+
+      ball.draw(ctx)
+    }());
+  </script>
+</body>
+</html>

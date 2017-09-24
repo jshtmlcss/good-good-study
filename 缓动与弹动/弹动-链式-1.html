@@ -63,12 +63,11 @@
 
     canvas.addEventListener('mousemove', mousemove)
 
+    // 创建小球
     function createBalls (nums) {
       let items = []
-      for (let i = 0; i < nums; i++) {
-        let ball = new Ball()
-        ball.radius = 10
-        items.push(ball)
+      while (nums--) {
+        items.push(new Ball({ radius: 20 }))
       }
       return items
     }
@@ -77,6 +76,7 @@
       mouse = { x: e.offsetX, y: e.offsetY }
     }
 
+    // 小球位置计算
     function move (ball, targetX, targetY) {
       ball.vx += (targetX - ball.x) * spring
       ball.vx *= friction
@@ -89,26 +89,31 @@
       ball.y += ball.vy
     }
 
+    // 绘制小球
+    function draw (ball, index) {
+      let { x, y } = mouse
+      if (index !== 0) {
+        x = balls[index - 1].x
+        y = balls[index - 1].y
+      }        
+      move(ball, x, y)
+      ctx.moveTo(x, y)
+      ctx.lineTo(ball.x, ball.y)
+      ctx.stroke()
+      // 调整层级
+      ctx.globalCompositeOperation = 'source-over'
+      ball.draw(ctx)
+      // 调整层级
+      ctx.globalCompositeOperation = 'destination-over'
+    }
+
     ;(function drawFrame() {
       window.requestAnimationFrame(drawFrame)
+
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-
       ctx.beginPath()
-      ctx.moveTo(mouse.x, mouse.y)
-      balls.forEach(ball => {
-        ctx.lineTo(ball.x, ball.y)
-      })
-      ctx.stroke()
 
-      balls.forEach((ball, index) => {
-        let { x, y } = mouse
-        if (index !== 0) {
-          x = balls[index - 1].x
-          y = balls[index - 1].y
-        }
-        move(ball, x, y)
-        ball.draw(ctx)
-      })
+      balls.forEach(draw)
     }());
   </script>
 </body>
