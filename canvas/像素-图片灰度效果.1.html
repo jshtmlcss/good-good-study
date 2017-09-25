@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>像素-图片灰度效果</title>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let image = new Image()
+    image.onload = change
+    image.src = './chrome.png'
+
+    function change () {
+      canvas.width = image.width
+      canvas.height = image.height
+      ctx.drawImage(image, 0, 0)
+      let imageData = ctx.getImageData(0, 0, image.width, image.height)
+      let pixels = imageData.data
+      let len = pixels.length
+      for (i = 0; i < len; i += 4) {
+        pixels[i] = 255 - pixels[i]
+        pixels[i + 1] = 255 - pixels[i + 1]
+        pixels[i + 2] = 255 - pixels[i + 2]
+      }
+      ctx.putImageData(imageData, 0, 0)
+    }
+  </script>
+</body>
+</html>

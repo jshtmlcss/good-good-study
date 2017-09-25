@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>弹动-跟随鼠标-1</title>
+  <title>弹动-偏移量-1</title>
 </head>
 <body>
   <canvas id="canvas" width="1000" height="500" style="border: 1px solid #000;"></canvas>
@@ -57,13 +57,12 @@
     let ctx = canvas.getContext('2d')
     let ball = new Ball()
     let spring = 0.03
+    let springLength = 100
     let friction = 0.95
     let targetX = canvas.width / 2
     let targetY = canvas.height / 2
     let mouse = { x: targetX, y: targetY }
 
-    ball.vx = 10
-    ball.vy = 10
     // 初始坐标
     ball.x = targetX
     ball.y = targetY
@@ -78,24 +77,28 @@
       window.requestAnimationFrame(drawFrame)
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      let dx = mouse.x - ball.x
-      let dy = mouse.y - ball.y
-      let ax = dx * spring
-      let ay = dy * spring
+      let dx = ball.x - mouse.x
+      let dy = ball.y - mouse.y
+      let angle = Math.atan2(dy, dx)
+      let targetX = mouse.x + Math.cos(angle) * springLength
+      let targetY = mouse.y + Math.sin(angle) * springLength
 
-      if (Math.abs(ball.vx) > 0.001) {
-        ball.vx += ax
-        ball.vx *= friction
-      }
+      ball.vx += (targetX - ball.x) * spring
+      ball.vx *= friction
 
-      if (Math.abs(ball.vy) > 0.001) {
-        ball.vy += ay
-        ball.vy *= friction
-      }
+      ball.vy += (targetY - ball.y) * spring
+      ball.vy *= friction
+
       ball.x += ball.vx
       ball.y += ball.vy
 
+      ctx.beginPath()
+      ctx.moveTo(mouse.x, mouse.y)
+      ctx.lineTo(ball.x, ball.y)
+      ctx.stroke()
+
       ball.draw(ctx)
+
     }());
   </script>
 </body>
