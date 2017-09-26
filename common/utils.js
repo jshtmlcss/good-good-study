@@ -47,3 +47,18 @@ export function intersects (rectA, rectB) {
           rectA.y + rectA.height < rectB.y ||
           rectB.y + rectB.height < rectA.y)
 }
+
+/**
+ * Keeps track of the current mouse position, relative to an element.
+ * @param {HTMLElement} element
+ * @return {object} Contains properties: x, y, event
+ */
+export function captureMouse (element) {
+  let mouse = {x: 0, y: 0, e: null}
+  element.addEventListener('mousemove', e => {
+    mouse.x = e.offsetX
+    mouse.y = e.offsetY
+    mouse.e = e
+  })
+  return mouse
+}

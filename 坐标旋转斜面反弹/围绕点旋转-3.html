@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>围绕点旋转-3</title>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500"></canvas>
+  <script>
+    class Ball {
+      constructor (props) {
+        this.radius = 40
+        this.color = '#ff0000'
+        this.x = 0
+        this.y = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.lineWidth = 1
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script type="module">
+    import { captureMouse } from '../common/utils.js'
+
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let ball = new Ball()
+    let vr = 0.05
+    let cos = null
+    let sin = null
+    let centerX = canvas.width / 2
+    let centerY = canvas.height / 2
+    let balls = createBall(10)
+    let mouse = captureMouse(canvas)
+
+    function createBall (nums) {
+      let balls = []
+      while (nums--) {
+        balls.push(new Ball({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height
+        }))
+      }
+      return balls
+    }
+
+    function draw (ball) {
+      let x1 = ball.x - centerX
+      let y1 = ball.y - centerY
+      let x2 = cos * x1 - sin * y1
+      let y2 = cos * y1 + sin * x1
+
+      ball.x = centerX + x2
+      ball.y = centerY + y2
+      ball.draw(ctx)
+    }
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      let angle = (mouse.x - centerX) * 0.0005
+      cos = Math.cos(angle)
+      sin = Math.sin(angle)
+
+      balls.forEach(draw)
+    }());
+  </script>
+</body>
+</html>

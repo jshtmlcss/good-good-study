@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>围绕点旋转-2</title>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500"></canvas>
+  <script>
+    class Ball {
+      constructor (radius = 40, color = '#ff0000') {
+        this.radius = radius
+        this.color = color
+        this.x = 0
+        this.y = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.lineWidth = 1
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script>
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let ball = new Ball()
+    let vr = 0.05
+    let cos = Math.cos(vr)
+    let sin = Math.sin(vr)
+    let centerX = canvas.width / 2
+    let centerY = canvas.height / 2
+
+    ball.x = Math.random() * canvas.width
+    ball.y = Math.random() * canvas.height
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      let x1 = ball.x - centerX
+      let y1 = ball.y - centerY
+      let x2 = cos * x1 - sin * y1
+      let y2 = cos * y1 + sin * x1
+
+      ball.x = centerX + x2
+      ball.y = centerY + y2
+
+      ball.draw(ctx)
+    }());
+  </script>
+</body>
+</html>
