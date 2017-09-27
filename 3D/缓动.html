@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>缓动</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="500" style="border: 1px solid #000; background: #000;"></canvas>
+  <script>
+    class Ball3d {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.xpos = 0
+        this.ypos = 0
+        this.zpos = 0
+        this.radius = 40
+        this.vx = 0
+        this.vy = 0
+        this.vz = 0
+        this.mass = 1
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = '#ff0000'
+        this.lineWidth = 1
+        this.visible = true
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script type="module">
+    let canvas = document.getElementById('canvas')
+    let width = canvas.width
+    let height = canvas.height
+    let ctx = canvas.getContext('2d')
+    let ball = new Ball3d()
+    let fl = 250
+    let vpX = width / 2
+    let vpY = height / 2
+    let tx
+    let ty
+    let tz
+    let easing = 0.1
+
+    // 设置目标点
+    function setTarget () {
+      tx = Math.random() * 500 - 250
+      ty = Math.random() * 500 - 250
+      tz = Math.random() * 500
+    }
+
+    setTarget()
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+
+      let dx = tx - ball.xpos
+      let dy = ty - ball.ypos
+      let dz = tz - ball.zpos
+
+      // 比二维缓动多加了一个dz平方
+      let dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+      ball.xpos += dx * easing
+      ball.ypos += dy * easing
+      ball.zpos += dz * easing
+
+      if (dist < 1) {
+        setTarget()
+      }
+
+      if (ball.zpos > -fl) {
+        let scale = fl / (ball.zpos + fl)
+        ball.scaleX = ball.scaleY = scale
+        ball.x = vpX + ball.xpos * scale
+        ball.y = vpY + ball.ypos * scale
+        ball.visible = true
+      } else {
+        ball.visible = false
+      }
+
+      ball.draw(ctx)
+    })();
+
+  </script>
+</body>
+
+</html>

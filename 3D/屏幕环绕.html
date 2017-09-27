@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>屏幕环绕</title>
+</head>
+<body>
+  <canvas id="canvas" width="800" height="500" style="background: #000; border: 1px solid #000;"></canvas>
+  <script type="module">
+    import { colorToRGB } from '../common/utils.js'
+
+    class Tree {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.xpos = 0
+        this.ypos = 0
+        this.zpos = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = "#ffffff"
+        this.alpha = 1
+        this.lineWidth = 1
+        this.branch = []
+
+        //generate some random branch positions
+        this.branch[0] = -140 - Math.random() * 20
+        this.branch[1] = -30 - Math.random() * 30
+        this.branch[2] = Math.random() * 80 - 40
+        this.branch[3] = -100 - Math.random() * 40
+        this.branch[4] = -60 - Math.random() * 40
+        this.branch[5] = Math.random() * 60 - 30
+        this.branch[6] = -110 - Math.random() * 20
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.scale(this.scaleX, this.scaleY)
+
+        ctx.lineWidth = this.lineWidth
+        ctx.strokeStyle = colorToRGB(this.color, this.alpha)
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(0, this.branch[0])
+        ctx.moveTo(0, this.branch[1])
+        ctx.lineTo(this.branch[2], this.branch[3])
+        ctx.moveTo(0, this.branch[4])
+        ctx.lineTo(this.branch[5], this.branch[6])
+        ctx.stroke()
+        ctx.restore()
+      }
+    }
+
+
+    // 实现逻辑部分
+
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d')
+    let floor = 200
+    let fl = 250
+    let vpX = canvas.width / 2
+    let vpY = canvas.height / 2
+    let vz = 0
+    let trees = createTree(100)
+    let friction = 0.98
+
+    function createTree (nums) {
+      let trees = []
+      while (nums--) {
+        trees.push(new Tree({
+          xpos: Math.random() * 2000 - 1000,
+          ypos: floor,
+          zpos: Math.random() * 10000
+        }))
+      }
+      return trees
+    }
+
+    window.addEventListener('keydown', keydown)
+
+    function keydown (e) {
+      if (e.keyCode === 38) { // 上
+        vz -= 1
+      } else if (e.keyCode === 40) { // 下
+        vz += 1
+      }
+    }
+
+    function move (tree) {
+      tree.zpos += vz
+
+      if (tree.zpos < -fl) {
+        tree.zpos += 10000
+      }
+      if (tree.zpos > 10000 - fl) {
+        tree.zpos -= 10000
+      }
+      let scale = fl / (fl + tree.zpos)
+      tree.scaleX = tree.scaleY = scale
+      tree.x = vpX + tree.xpos * scale
+      tree.y = vpY + tree.ypos * scale
+      tree.alpha = scale
+    }
+
+    function zSort (a, b) {
+      return (b.zpos - a.zpos)
+    }
+
+    function draw (tree) {
+      tree.draw(ctx)
+    }
+
+    trees.sort(zSort)
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      trees.forEach(move)
+      vz *= friction
+      trees.sort(zSort)
+      trees.forEach(draw)
+    })();
+  </script>
+</body>
+</html>

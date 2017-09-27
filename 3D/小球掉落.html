@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>小球掉落</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="500" style="border: 1px solid #000; background: #000;"></canvas>
+  <script>
+    class Ball3d {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.xpos = 0
+        this.ypos = 0
+        this.zpos = 0
+        this.radius = 40
+        this.vx = 0
+        this.vy = 0
+        this.vz = 0
+        this.mass = 1
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = '#ff0000'
+        this.lineWidth = 1
+        this.visible = true
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script type="module">
+    import { parseColor } from '../common/utils.js'
+
+    let canvas = document.getElementById('canvas')
+    let width = canvas.width
+    let height = canvas.height
+    let ctx = canvas.getContext('2d')
+    let balls = createBall(100)
+    let fl = 250
+    let vpX = width / 2
+    let vpY = height / 2
+    let gravity = 0.2
+    let floor = 100
+    let bounce = -0.6
+
+    function createBall (nums) {
+      let balls = []
+      while (nums--) {
+        balls.push(new Ball3d({
+          radius: 3,
+          color: parseColor(Math.random() * 0xffffff),
+          ypos: -150,
+          vx: Math.random() * 6 - 3,
+          vy: Math.random() * 6 - 3,
+          vz: Math.random() * 6 - 3
+        }))
+      }
+      return balls
+    }
+
+    function move (ball) {
+      ball.vy += gravity
+      ball.xpos += ball.vx
+      ball.ypos += ball.vy
+      ball.zpos += ball.vz
+
+      // 小球到达边界值反弹
+      if (ball.ypos > floor) {
+        ball.ypos = floor
+        ball.vy *= bounce
+      }
+
+      if (ball.zpos > -fl) {
+        let scale = fl / (fl + ball.zpos)
+        ball.scaleX = ball.scaleY = scale
+        ball.x = vpX + ball.xpos * scale
+        ball.y = vpY + ball.ypos * scale
+        ball.visible = true
+      } else {
+        ball.visible = false
+      }
+    }
+
+    // 排序，让zpos值大的球在前面
+    function zsort (a, b) {
+      return b.zpos - a.zpos
+    }
+
+    function draw (ball) {
+      if (ball.visible) {
+        ball.draw(ctx)
+      }
+    }
+
+    balls.sort(zsort)
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+      balls.forEach(ball => {
+        move(ball)
+        draw(ball)
+      })
+    })();
+
+  </script>
+</body>
+
+</html>

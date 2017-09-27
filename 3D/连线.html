@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>连线</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="500" style="border: 1px solid #000; "></canvas>
+  <script>
+    class Point3d {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.z = 0
+        this.fl = 250
+        this.vpX = 0
+        this.vpY = 0
+        this.cX = 0
+        this.cY = 0
+        this.cZ = 0
+        Object.assign(this, props)
+      }
+      setVanishingPoint (vpX, vpY) {
+        this.vpX = vpX
+        this.vpY = vpY
+      }
+      setCenter (cX, cY, cZ) {
+        this.cX = cX
+        this.cY = cY
+        this.cZ = cZ
+      }
+      rotateX (angleX) {
+        let cosX = Math.cos(angleX)
+        let sinX = Math.sin(angleX)
+        let y1 = this.y * cosX - this.z * sinX
+        let z1 = this.z * cosX + this.y * sinX
+        this.y = y1
+        this.z = z1
+      }
+      rotateY (angleY) {
+        let cosY = Math.cos(angleY)
+        let sinY = Math.sin(angleY)
+        let x1 = this.x * cosY - this.z * sinY
+        let z1 = this.z * cosY + this.x * sinY
+        this.x = x1
+        this.z = z1
+      }
+      rotateZ (angleZ) {
+        let cosZ = Math.cos(angleZ)
+        let sinZ = Math.sin(angleZ)
+        let x1 = this.x * cosZ - this.y * sinZ
+        let y1 = this.y * cosZ + this.x * sinZ
+        this.x = x1
+        this.y = y1
+      }
+      getScreenX () {
+        let scale = this.fl / (this.fl + this.z + this.cZ)
+        return this.vpX + (this.cX + this.x) * scale
+      }
+      getScreenY () {
+        let scale = this.fl / (this.fl + this.z + this.cZ)
+        return this.vpY + (this.cY + this.y) * scale
+      }
+    }
+  </script>
+  <script type="module">
+    import { parseColor, captureMouse } from '../common/utils.js'
+
+    let canvas = document.getElementById('canvas')
+    let width = canvas.width
+    let height = canvas.height
+    let ctx = canvas.getContext('2d')
+    let fl = 250
+    let vpX = width / 2
+    let vpY = height / 2
+    let mouse = captureMouse(canvas)
+    let points = createPoint(30)
+    let angleY
+    let angleX
+
+    function createPoint (nums) {
+      let points = []
+      while (nums--) {
+        let point = new Point3d({
+          x: Math.random() * 400 - 200,
+          y: Math.random() * 400 - 200,
+          z: Math.random() * 400 - 200
+        })
+        point.setVanishingPoint(vpX, vpY)
+        points.push(point)
+      }
+      return points
+    }
+
+    function move (point, index) {
+      point.rotateX(angleX)
+      point.rotateY(angleY)
+    }
+
+    function draw (point, index) {
+      if (index !== 0) {
+        ctx.lineTo(point.getScreenX(), point.getScreenY())
+      }
+    }
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+
+      angleY = (mouse.x - vpX) * 0.0001
+      angleX = (mouse.y - vpY) * 0.0001
+
+      points.forEach(move)
+
+      ctx.beginPath()
+      ctx.moveTo(points[0].getScreenX(), points[0].getScreenY())
+      points.forEach(draw)
+      ctx.stroke()
+    })();
+
+  </script>
+</body>
+
+</html>

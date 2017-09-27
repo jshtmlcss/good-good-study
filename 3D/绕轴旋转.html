@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>绕轴旋转</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="500" style="border: 1px solid #000; background: #000;"></canvas>
+  <script>
+    class Ball3d {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.xpos = 0
+        this.ypos = 0
+        this.zpos = 0
+        this.radius = 40
+        this.vx = 0
+        this.vy = 0
+        this.vz = 0
+        this.mass = 1
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = '#ff0000'
+        this.lineWidth = 1
+        this.visible = true
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script type="module">
+    import { parseColor, captureMouse } from '../common/utils.js'
+
+    let canvas = document.getElementById('canvas')
+    let width = canvas.width
+    let height = canvas.height
+    let ctx = canvas.getContext('2d')
+    let balls = createBall(30)
+    let fl = 250
+    let vpX = width / 2
+    let vpY = height / 2
+    let mouse = captureMouse(canvas)
+    let angleY
+    let angleX
+
+    function createBall (nums) {
+      let balls = []
+      while (nums--) {
+        balls.push(new Ball3d({
+          radius: Math.random() * 8 + 4,
+          lineWidth: 0,
+          color: parseColor(Math.random() * 0xffffff),
+          xpos: Math.random() * 400 - 200,
+          ypos: Math.random() * 400 - 200,
+          zpos: Math.random() * 400 - 200
+        }))
+      }
+      return balls
+    }
+
+    // 绕X轴旋转小球
+    function rotateX (ball, angle) {                      
+      let cos = Math.cos(angle)
+      let sin = Math.sin(angle)
+      let y1 = ball.ypos * cos - ball.zpos * sin
+      let z1 = ball.zpos * cos + ball.ypos * sin
+      ball.ypos = y1
+      ball.zpos = z1
+    }
+    
+
+    // 绕Y轴旋转小球
+    function rotateY (ball, angle) {
+      let sin = Math.sin(angle)
+      let cos = Math.cos(angle)
+
+      let x1 = ball.xpos * cos - ball.zpos * sin
+      let z1 = ball.zpos * cos + ball.xpos * sin
+
+      ball.xpos = x1
+      ball.zpos = z1
+    }
+
+    // 透视
+    function setPerspective (ball) {
+      if (ball.zpos > -fl) {
+        let scale = fl / (fl + ball.zpos)
+        ball.scaleX = ball.scaleY = scale
+        ball.x = vpX + ball.xpos * scale
+        ball.y = vpY + ball.ypos * scale
+        ball.visible = true
+      } else {
+        ball.visible = false
+      }
+    }
+
+    function move (ball) {
+      rotateX(ball, angleX)
+      rotateY(ball, angleY)
+      setPerspective(ball)
+    }
+
+    // 排序，让zpos值大的球在前面
+    function zsort (a, b) {
+      return b.zpos - a.zpos
+    }
+
+    function draw (ball) {
+      if (ball.visible) {
+        ball.draw(ctx)
+      }
+    }
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+
+      angleY = (mouse.x - vpX) * 0.0001
+      angleX = (mouse.y - vpY) * 0.0001
+
+      balls.sort(zsort)
+      balls.forEach(move)
+      balls.forEach(draw)
+
+    })();
+
+  </script>
+</body>
+
+</html>
