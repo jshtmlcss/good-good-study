@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>云朵</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="0" height="0" style="background: #83aeda;"></canvas>
+  <script>
+    /**
+     * 云朵类
+     */
+    class Cloud {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.xpos = 0
+        this.ypos = 0
+        this.zpos = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.visible = true
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+        ctx.drawImage(this.image, 0, 0)
+        ctx.restore()
+      }
+    }
+  </script>
+  <script type="module">
+    import { captureMouse } from '../common/utils.js'
+
+    let image = new Image()
+    image.onload = init 
+    image.src = '../canvas/cloud.png'
+
+    // 初始化
+    function init () {
+      let canvas = document.getElementById('canvas')
+      let width = canvas.width = document.documentElement.clientWidth
+      let height = canvas.height = document.documentElement.clientHeight
+      let ctx = canvas.getContext('2d')
+      let clouds = createCloud(50)
+      let fl = 250          // 观察点距离（镜头焦距）
+      let vpX = width / 2   // 消失点，设为画布中心
+      let vpY = height / 2  // 消失点，设为画布中心
+      let mouse = captureMouse(canvas) // 鼠标在canvas上移动的坐标
+      let angleY // Y轴角度
+      let angleX // X轴角度
+  
+      /**
+       * 创建云
+       * @param {Number} nums 云朵数量
+       * @returns {Object} 返回云朵类集合
+       */
+      function createCloud (nums) {
+        let clouds = []
+        while (nums--) {
+          clouds.push(new Cloud({
+            radius: Math.random() * 10 + 5,
+            xpos: Math.random() * width - width / 2,
+            ypos: Math.random() * height - height / 2,
+            zpos: Math.random() * 400 - 200,
+            image: image
+          }))
+        }
+        return clouds
+      }
+  
+      /**
+       * 绕X轴旋转
+       * @param {Object} cloud 云朵
+       * @param {Number} angle 角度
+       */
+      function rotateX (cloud, angle) {                      
+        let cos = Math.cos(angle)
+        let sin = Math.sin(angle)
+        // 通过X轴旋转公式得到ypos, zpos
+        let y1 = cloud.ypos * cos - cloud.zpos * sin
+        let z1 = cloud.zpos * cos + cloud.ypos * sin
+
+        cloud.ypos = y1
+        cloud.zpos = z1
+      }
+      
+  
+      /**
+       * 绕Y轴旋转
+       * @param {Object} cloud 云朵
+       * @param {Number} angle 角度
+       */
+      function rotateY (cloud, angle) {
+        let sin = Math.sin(angle)
+        let cos = Math.cos(angle)
+        // 通过Y轴旋转公式得到xpos, zpos
+        let x1 = cloud.xpos * cos - cloud.zpos * sin
+        let z1 = cloud.zpos * cos + cloud.xpos * sin
+  
+        cloud.xpos = x1
+        cloud.zpos = z1
+      }
+  
+      /**
+       * 透视（改变x，y和scale值）
+       * @param {Object} cloud 云朵
+       */
+      function setPerspective (cloud) {
+        // 防止比例出错要做一个判断
+        if (cloud.zpos > -fl) {
+          let scale = fl / (fl + cloud.zpos) // 产生 0～1 之间的一个值，用来做缩放和靠近消失点的一个比例
+          cloud.scaleX = cloud.scaleY = scale
+
+          cloud.x = vpX + cloud.xpos * scale
+          cloud.y = vpY + cloud.ypos * scale
+          cloud.visible = true
+        } else {
+          cloud.visible = false
+        }
+      }
+  
+      /**
+       * 计算位置
+       * @param {Object} cloud 云朵
+       */
+      function move (cloud) {
+        rotateX(cloud, angleX)
+        rotateY(cloud, angleY)
+        setPerspective(cloud)
+      }
+  
+      /**
+       * 排序，让云朵zpos值大的在前面，提升视觉效果
+       * @param {Object} a 云朵a
+       * @param {Object} b 云朵b
+       */
+      function zsort (a, b) {
+        return b.zpos - a.zpos
+      }
+  
+      function draw (cloud) {
+        if (cloud.visible) {
+          cloud.draw(ctx)
+        }
+      }
+  
+      ;(function drawFrame () {
+        window.requestAnimationFrame(drawFrame)
+        ctx.clearRect(0, 0, width, height)
+  
+        angleY = (mouse.x - vpX) * 0.00005
+        angleX = (mouse.y - vpY) * 0.00005
+
+        clouds.sort(zsort)
+        clouds.forEach(move)
+        clouds.forEach(draw)
+      })();
+    }
+
+  </script>
+</body>
+
+</html>

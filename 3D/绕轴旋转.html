@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>绕轴旋转</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
 </head>
 
 <body>
@@ -54,10 +60,10 @@
     import { parseColor, captureMouse } from '../common/utils.js'
 
     let canvas = document.getElementById('canvas')
-    let width = canvas.width
-    let height = canvas.height
+    let width = canvas.width = document.documentElement.clientWidth
+    let height = canvas.height = document.documentElement.clientHeight
     let ctx = canvas.getContext('2d')
-    let balls = createBall(30)
+    let balls = createBall(50)
     let fl = 250
     let vpX = width / 2
     let vpY = height / 2
@@ -69,11 +75,11 @@
       let balls = []
       while (nums--) {
         balls.push(new Ball3d({
-          radius: Math.random() * 8 + 4,
+          radius: Math.random() * 10 + 5,
           lineWidth: 0,
           color: parseColor(Math.random() * 0xffffff),
-          xpos: Math.random() * 400 - 200,
-          ypos: Math.random() * 400 - 200,
+          xpos: Math.random() * width - width / 2,
+          ypos: Math.random() * height - height / 2,
           zpos: Math.random() * 400 - 200
         }))
       }
