@@ -54,7 +54,7 @@
         picture.draw({
           src,
           x: (picture.el.width - 512) / 2,
-          y: 0
+          y: 100
         })
         // 图片加载完成执行动画
         picture.observer.on('loaded', () => {
@@ -62,7 +62,7 @@
             dotWidth: 2,
             dotHeight: 2
           }, {
-            // type: 'easeInOutBounce',
+            type: 'easeOutBack',
             speed: 5
           })
         })
