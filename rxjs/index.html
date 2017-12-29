@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>rxjs</title>
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/5.5.5/Rx.js"></script>
+  <script>
+    var numbers = Rx.Observable.of(10, 20, 30)
+    var letters = Rx.Observable.of('a', 'b', 'c')
+    var interval = Rx.Observable.interval(1000)
+    // var result = numbers.concat(letters).concat(interval)
+    // result.subscribe(x => console.log(x))
+    var arr$ = Rx.Observable.from([1, 1, 2, 3, 5, 8, 13]).toArray()
+    arr$.subscribe(x => console.log(x))
+  </script>
+</body>
+
+</html>
