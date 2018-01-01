@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>paste</title>
+</head>
+
+<body>
+  <div id="J_textarea" contentEditable="true" style="width: 800px;height: 400px;border: 1px solid red;"></div>
+  <script>
+    document.getElementById('J_textarea').addEventListener('paste', paste)
+
+    function paste (e) {
+      e.stopPropagation()
+      console.log(e.clipboardData.types)
+      console.log(e.clipboardData)
+      if (e.clipboardData.items[0].type.indexOf('image') !== -1) {
+        const file = e.clipboardData.items[0].getAsFile()
+        renderImage(this, file)
+      }
+    }
+
+    function renderImage (el, file) {
+      const reader = new FileReader()
+      reader.onload = e => {
+        const src = e.target.result
+        const image = new Image()
+        image.width = '200'
+        image.src = src
+        el.appendChild(image)
+      }
+      reader.readAsDataURL(file)
+    }
+  </script>
+</body>
+
+</html>
