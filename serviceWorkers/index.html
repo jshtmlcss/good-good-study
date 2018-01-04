@@ -6,24 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>service workers</title>
-  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/assets/styles/main.css">
 </head>
 
 <body>
+  <img src="/assets/images/test.jpg" />
   <script>
     if ('serviceWorker' in navigator) {
-      // window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(registration => {
-          // Registration was successful
-          console.log('ServiceWorker registration successful with scope: ', registration.scope)
-        }).catch(err => {
-          // registration failed :(
-          console.log('ServiceWorker registration failed: ', err)
-        })
-      // })
+      navigator.serviceWorker.register('/sw.js').then(registration => {
+        // Registration was successful
+        console.log('ServiceWorker registration successful with scope: ', registration.scope)
+      }).catch(err => {
+        // registration failed :(
+        console.log('ServiceWorker registration failed: ', err)
+      })
     }  
   </script>
-  <script src="/script/main.js"></script>
+  <script src="/assets/scripts/main.js"></script>
 </body>
 
 </html>
