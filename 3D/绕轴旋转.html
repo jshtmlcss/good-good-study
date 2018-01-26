@@ -60,8 +60,8 @@
     import { parseColor, captureMouse } from '../common/utils.js'
 
     let canvas = document.getElementById('canvas')
-    let width = canvas.width = document.documentElement.clientWidth
-    let height = canvas.height = document.documentElement.clientHeight
+    let width = canvas.width = 500
+    let height = canvas.height = 500
     let ctx = canvas.getContext('2d')
     let balls = createBall(50)
     let fl = 250
@@ -75,7 +75,7 @@
       let balls = []
       while (nums--) {
         balls.push(new Ball3d({
-          radius: Math.random() * 10 + 5,
+          radius: Math.random() * 10 + 10,
           lineWidth: 0,
           color: parseColor(Math.random() * 0xffffff),
           xpos: Math.random() * width - width / 2,
@@ -132,7 +132,6 @@
     function zsort (a, b) {
       return b.zpos - a.zpos
     }
-
     function draw (ball) {
       if (ball.visible) {
         ball.draw(ctx)
@@ -143,8 +142,8 @@
       window.requestAnimationFrame(drawFrame)
       ctx.clearRect(0, 0, width, height)
 
-      angleY = (mouse.x - vpX) * 0.0001
-      angleX = (mouse.y - vpY) * 0.0001
+      angleY = (mouse.x - vpX) * 0.0005
+      angleX = (mouse.y - vpY) * 0.0005
 
       balls.sort(zsort)
       balls.forEach(move)
