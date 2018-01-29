@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>平面图形</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="500" style="border: 1px solid #000; "></canvas>
+  <script type="module">
+    import { parseColor, captureMouse } from '../common/utils.js'
+    import Point3d from '../common/point3d.js'
+    const canvas = document.getElementById('canvas')
+    const width = canvas.width
+    const height = canvas.height
+    const ctx = canvas.getContext('2d')
+    const fl = 250
+    const mouse = captureMouse(canvas)
+    const points = []
+    const vpX = width / 2
+    const vpY = height / 2
+    let angleY
+    let angleX
+    const z = 30
+    // 图形的点坐标
+    points[0]  = new Point3d( -120, -24, z)
+    points[1]  = new Point3d(  100, -162, z)
+    points[2]  = new Point3d( 100,  -112, z)
+    points[3]  = new Point3d( -90,  0, z)
+    points[4]  = new Point3d(  100,  112, z)
+    points[5]  = new Point3d( 100,  152, z)
+    points[6]  = new Point3d(-120,  24, z)
+
+    points.forEach(point => {
+      // 设置消失点
+      point.setVanishingPoint(vpX, vpY)
+      // 设置中心点
+      point.setCenter(0, 0, 200)
+    })
+
+    function move (point, index) {
+      point.rotateX(angleX)
+      point.rotateY(angleY)
+    }
+
+    function draw (point, index) {
+      if (index !== 0) {
+        // 获取每个点的透视图坐标并连接起来
+        ctx.lineTo(point.getScreenX(), point.getScreenY())
+      }
+    }
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+
+      angleY = (mouse.x - vpX) * 0.0005
+      angleX = (mouse.y - vpY) * 0.0005
+
+      points.forEach(move)
+      // 填充颜色
+      ctx.fillStyle = '#f0c3c2'
+      ctx.beginPath()
+      // 从第0点开始连线
+      ctx.moveTo(points[0].getScreenX(), points[0].getScreenY())
+      // 绘制
+      points.forEach(draw)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.fill()
+    })();
+
+  </script>
+</body>
+
+</html>
