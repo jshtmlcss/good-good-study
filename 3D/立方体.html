@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>立方体</title>
+</head>
+
+<body>
+  <canvas id="canvas" width="800" height="500" style="border: 1px solid #000; "></canvas>
+  <script>
+    // 三角形类
+    class Triangle {
+      constructor (a, b, c, color = '#ff0000') {
+        this.pointA = a
+        this.pointB = b
+        this.pointC = c
+        this.color = color
+        this.lineWidth = 1
+      }
+      draw (context) {
+        context.save()
+        context.lineWidth = this.lineWidth
+        context.fillStyle = context.strokeStyle = this.color
+        context.globalAlpha = 0.5
+        context.beginPath()
+        context.moveTo(this.pointA.getScreenX(), this.pointA.getScreenY())
+        context.lineTo(this.pointB.getScreenX(), this.pointB.getScreenY())
+        context.lineTo(this.pointC.getScreenX(), this.pointC.getScreenY())
+        context.closePath()
+        context.fill()
+        if (this.lineWidth > 0) {
+          context.stroke()
+        }
+        context.restore()
+      }
+    }
+  </script>
+  <script type="module">
+    import { parseColor, captureMouse } from '../common/utils.js'
+    import Point3d from '../common/point3d.js'
+    const canvas = document.getElementById('canvas')
+    const width = canvas.width
+    const height = canvas.height
+    const ctx = canvas.getContext('2d')
+    const fl = 250
+    const mouse = captureMouse(canvas)
+    const points = []
+    const triangles = []
+    const vpX = width / 2
+    const vpY = height / 2
+    let angleY
+    let angleX
+    //front four corners
+    points[0] = new Point3d(-100, -100, -100)
+    points[1] = new Point3d( 100, -100, -100)
+    points[2] = new Point3d( 100,  100, -100)
+    points[3] = new Point3d(-100,  100, -100)
+    //back four corners
+    points[4] = new Point3d(-100, -100, 100)
+    points[5] = new Point3d( 100, -100, 100)
+    points[6] = new Point3d( 100,  100, 100)
+    points[7] = new Point3d(-100,  100, 100)
+
+    //front
+    triangles[0]  = new Triangle(points[0], points[1], points[2], "#6666cc")
+    triangles[1]  = new Triangle(points[0], points[2], points[3], "#6666cc")
+    //top
+    triangles[2]  = new Triangle(points[0], points[5], points[1], "#66cc66")
+    triangles[3]  = new Triangle(points[0], points[4], points[5], "#66cc66")
+    //back
+    triangles[4]  = new Triangle(points[4], points[6], points[5], "#cc6666")
+    triangles[5]  = new Triangle(points[4], points[7], points[6], "#cc6666")
+    //bottom
+    triangles[6]  = new Triangle(points[3], points[2], points[6], "#cc66cc")
+    triangles[7]  = new Triangle(points[3], points[6], points[7], "#cc66cc")
+    //right
+    triangles[8]  = new Triangle(points[1], points[5], points[6], "#66cccc")
+    triangles[9]  = new Triangle(points[1], points[6], points[2], "#66cccc")
+    //left
+    triangles[10] = new Triangle(points[4], points[0], points[3], "#cccc66")
+    triangles[11] = new Triangle(points[4], points[3], points[7], "#cccc66")
+
+    points.forEach(point => {
+      // 设置消失点
+      point.setVanishingPoint(vpX, vpY)
+      // 设置中心点
+      point.setCenter(0, 0, 200)
+    })
+
+    function move (point, index) {
+      point.rotateX(angleX)
+      point.rotateY(angleY)
+    }
+
+    function draw (triangle, index) {
+      triangle.draw(ctx)
+    }
+
+    ;(function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+
+      angleY = (mouse.x - vpX) * 0.0005
+      angleX = (mouse.y - vpY) * 0.0005
+
+      points.forEach(move)
+      // 绘制三角形
+      triangles.forEach(draw)
+    })();
+
+  </script>
+</body>
+
+</html>
