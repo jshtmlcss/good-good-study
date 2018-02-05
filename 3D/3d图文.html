@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>绕轴旋转</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" style="border: 1px solid #000; background: #000;"></canvas>
+  <div style="position: absolute; bottom: 100px; left: 40%;">
+    <input type="text" value="JS" id="J_textInput">
+    <button id="J_confirm">确定</button>
+    <button id="J_disperse">离散</button>
+  </div>
+  <script>
+    class Ball3d {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.xpos = 0
+        this.ypos = 0
+        this.zpos = 0
+        this.radius = 40
+        this.vx = 0
+        this.vy = 0
+        this.vz = 0
+        this.rotation = 0
+        this.scaleX = 1
+        this.scaleY = 1
+        this.color = '#ff0000'
+        this.lineWidth = 1
+        this.visible = true
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        ctx.save()
+        ctx.translate(this.x, this.y)
+        ctx.rotate(this.rotation)
+        ctx.scale(this.scaleX, this.scaleY)
+
+        ctx.lineWidth = this.lineWidth
+        ctx.fillStyle = this.color
+        ctx.beginPath()
+        ctx.arc(0, 0, this.radius, 0, (Math.PI * 2), true)
+        ctx.closePath()
+        ctx.fill()
+        if (this.lineWidth > 0) {
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+    }
+  </script>
+  <script type="module">
+    import { parseColor, captureMouse } from '../common/utils.js'
+
+    const canvas = document.getElementById('canvas')
+    const width = canvas.width = document.documentElement.clientWidth
+    const height = canvas.height = document.documentElement.clientHeight
+    const ctx = canvas.getContext('2d')
+    const fl = 550
+    const vpX = width / 2
+    const vpY = height / 2
+    const balls = []
+    let mouse = captureMouse(canvas)
+    let angleY
+    let angleX
+    // 调试
+    window.isDisperse = false
+    window.balls = balls
+    window.ballLength = 0
+    window.loadAnimation = false
+    window.complete = { length: 0 }
+
+    function random (min, max) {
+      if (arguments.length < 2) {
+        max = min
+        min = 0
+      }
+      if (min > max) {
+        var hold = max
+        max = min
+        min = hold
+      }
+      return Math.floor(Math.random() * (max - min + 1)) + min
+    }
+
+    function guid () {
+      function s4 () {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
+      }
+      return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
+    }
+
+    // 绕X轴旋转小球
+    function rotateX (ball, angle) {                      
+      let cos = Math.cos(angle)
+      let sin = Math.sin(angle)
+      let y1 = ball.ypos * cos - ball.zpos * sin
+      let z1 = ball.zpos * cos + ball.ypos * sin
+      ball.ypos = y1
+      ball.zpos = z1
+    }
+    
+    // 绕Y轴旋转小球
+    function rotateY (ball, angle) {
+      let sin = Math.sin(angle)
+      let cos = Math.cos(angle)
+
+      let x1 = ball.xpos * cos - ball.zpos * sin
+      let z1 = ball.zpos * cos + ball.xpos * sin
+
+      ball.xpos = x1
+      ball.zpos = z1
+    }
+
+    // 透视
+    function setPerspective (ball) {
+      if (ball.zpos > -fl) {
+        let scale = fl / (fl + ball.zpos)
+        ball.scaleX = ball.scaleY = scale
+        ball.x = vpX + ball.xpos * scale
+        ball.y = vpY + ball.ypos * scale
+        ball.visible = true
+      } else {
+        ball.visible = false
+      }
+    }
+
+    function move (ball) {
+      rotateX(ball, angleX)
+      rotateY(ball, angleY)
+      setPerspective(ball)
+    }
+
+    // 排序，让zpos值大的球在前面
+    function zsort (a, b) {
+      return b.zpos - a.zpos
+    }
+    function draw (ball) {
+      if (ball.visible) {
+        ball.draw(ctx)
+      }
+    }
+
+    // 获取像素点
+    function getImageData (obj) {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      canvas.width = width
+      canvas.height = height
+
+      if (typeof obj === 'string') {
+        // 绘制文字
+        ctx.font = '420px 微软雅黑 bold'
+        ctx.fillStyle = '#fff'
+        ctx.textBaseline = 'middle'
+        ctx.textAlign = 'center'
+        ctx.fillText(obj, width / 2, height / 2)
+      } else {
+        // 绘制图片
+        ctx.drawImage(obj, (width - obj.width) / 2, (height - obj.height) / 2 , obj.width, obj.height)
+      }
+
+      // 获取像素点
+      const data = ctx.getImageData(0, 0, width, height).data
+      const girdX = 30
+      const girdY = 30
+      const items = []
+      for (let x = 0; x < width; x += girdX) {
+        for (let y = 0; y < height; y += girdY) {
+          let pos = (y * width + x) * 4
+          if (data[pos + 3] > 128) {
+            items.push({ x, y, rgba: [data[pos], data[pos + 1], data[pos + 2], data[pos + 3]] })
+          }
+        }
+      }
+      return items
+    }
+
+    function drawFrame () {
+      window.requestAnimationFrame(drawFrame)
+      ctx.clearRect(0, 0, width, height)
+      angleY = (mouse.x - vpX) * 0.00005
+      angleX = (mouse.y - vpY) * 0.00005
+      balls.sort(zsort)
+      if (loadAnimation) {
+        animate()
+      } else {
+        balls.forEach(move)
+      }
+      balls.forEach(draw)
+    }
+
+    // 离散聚合动画
+    function animate () {
+      const easing = 0.1
+      balls.forEach((ball, index) => {
+        const dx = ball.tx - ball.xpos
+        const dy = ball.ty - ball.ypos
+        const dz = ball.tz - ball.zpos
+        const dr = ball.tr - ball.radius
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz + dr * dr)
+        ball.xpos += dx * easing
+        ball.ypos += dy * easing
+        ball.zpos += dz * easing
+        ball.radius += dr * easing
+        if (dist < 1) {
+          if (!complete[ball._id]) {
+            complete.length++
+            complete[ball._id] = true
+          }
+          if (complete.length === ballLength) {
+            loadAnimation = false
+            complete = { length: 0 }
+          }
+        }
+        setPerspective(ball)
+      })
+    }
+
+    // 计算每次变换的数量
+    function calculate (items) {
+      const value = balls.length - items.length
+      if (value < 0) {
+        for (let i = 0; i < Math.abs(value); i++) {
+          balls.push(new Ball3d({
+            _id: guid(),
+            lineWidth: 0,
+            radius: random(5, 40),
+            xpos: random(width, -width),
+            ypos: random(height, -height),
+            zpos: random(1000, -1000)
+          }))
+        }
+      } else if (value > 0) {
+        balls.splice(0, value)
+      }
+      balls.forEach((ball, index) => {
+        const { x, y, rgba } = items[index]
+        if (rgba[0] === 255 && rgba[1] === 255 && rgba[2] === 255 && rgba[3] === 255) {
+          ball.color = parseColor(Math.random() * 0xffffff)
+        } else {
+          ball.color = `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`
+        }
+        ball.tx = x - width / 2
+        ball.ty = y - height / 2
+        ball.tz = 10
+        ball.tr = 10
+      })
+      ballLength = balls.length
+    }
+
+    // 设置离散坐标
+    function disperse () {
+      balls.forEach(ball => {
+        ball.tx = random(width, -width)
+        ball.ty = random(height, -height)
+        ball.tz = random(1000, -1000)
+        ball.tr = random(5, 40)
+      })
+      isDisperse = true
+    }
+
+    function init () {
+      mouse.x = width / 1.8
+      mouse.y = height / 1.8
+      const image = new Image()
+      image.src = '../canvas/chrome.png'
+      image.onload = () => {
+        calculate(getImageData(image))
+        drawFrame()
+        loadAnimation = true
+      }
+    }
+
+    init()
+
+    function changeText () {
+      if (loadAnimation) return
+      complete = { length: 0 }
+      setTimeout(() => {
+        calculate(getImageData(document.getElementById('J_textInput').value))
+        isDisperse = false
+        loadAnimation = true
+      }, isDisperse ? 0 : 1000)
+      if (!isDisperse) {
+        disperse()
+        loadAnimation = true
+      }
+    }
+
+    function disperseAction () {
+      if (loadAnimation) return
+      disperse()
+      loadAnimation = true
+    }
+
+    document.getElementById('J_confirm').addEventListener('click', changeText)
+    document.getElementById('J_disperse').addEventListener('click', disperseAction)
+  </script>
+</body>
+
+</html>
