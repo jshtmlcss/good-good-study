@@ -28,6 +28,8 @@
     const light = new Light(30, 30)
     let angleY
     let angleX
+    mouse.x = width / 1.8
+    mouse.y = height / 1.8
     //front four corners
     points[0] = new Point3d(-100, -100, -100)
     points[1] = new Point3d( 100, -100, -100)
@@ -86,8 +88,8 @@
       window.requestAnimationFrame(drawFrame)
       ctx.clearRect(0, 0, width, height)
 
-      angleY = (mouse.x - vpX) * 0.0005
-      angleX = (mouse.y - vpY) * 0.0005
+      angleY = (mouse.x - vpX) * 0.00005
+      angleX = (mouse.y - vpY) * 0.00005
 
       points.forEach(move)
       // 深度排序
