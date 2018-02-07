@@ -87,3 +87,39 @@ export function captureMouse (element) {
   })
   return mouse
 }
+
+/**
+ * 休眠
+ * @param {Number} ms 
+ */
+export function sleep (ms) {
+  return new Promise(resolve => { setTimeout(resolve, ms) })
+}
+
+/**
+ * 范围内随机
+ * @param {Number} min 最小值
+ * @param {Number} max 最大值
+ */
+export function random (min, max) {
+  if (arguments.length < 2) {
+    max = min
+    min = 0
+  }
+  if (min > max) {
+    var hold = max
+    max = min
+    min = hold
+  }
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+/**
+ * 获取 guid
+ */
+export function guid () {
+  function s4 () {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
+}

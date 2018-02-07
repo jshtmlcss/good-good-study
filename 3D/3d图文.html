@@ -17,7 +17,7 @@
 <body>
   <canvas id="canvas" style="border: 1px solid #000; background: #000;"></canvas>
   <div style="position: absolute; bottom: 100px; left: 40%;">
-    <input type="text" value="JS" id="J_textInput">
+    <input type="text" value="</>" id="J_textInput">
     <button id="J_confirm">确定</button>
     <button id="J_disperse">离散</button>
   </div>
@@ -61,7 +61,7 @@
     }
   </script>
   <script type="module">
-    import { parseColor, captureMouse } from '../common/utils.js'
+    import { parseColor, captureMouse, guid, random, sleep } from '../common/utils.js'
 
     const canvas = document.getElementById('canvas')
     const width = canvas.width = document.documentElement.clientWidth
@@ -80,26 +80,6 @@
     window.ballLength = 0
     window.loadAnimation = false
     window.complete = { length: 0 }
-
-    function random (min, max) {
-      if (arguments.length < 2) {
-        max = min
-        min = 0
-      }
-      if (min > max) {
-        var hold = max
-        max = min
-        min = hold
-      }
-      return Math.floor(Math.random() * (max - min + 1)) + min
-    }
-
-    function guid () {
-      function s4 () {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
-      }
-      return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
-    }
 
     // 绕X轴旋转小球
     function rotateX (ball, angle) {                      
@@ -153,7 +133,7 @@
     }
 
     // 获取像素点
-    function getImageData (obj) {
+    function getImageData (obj, gird = 12) {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       canvas.width = width
@@ -161,7 +141,7 @@
 
       if (typeof obj === 'string') {
         // 绘制文字
-        ctx.font = '420px 微软雅黑 bold'
+        ctx.font = '420px bold'
         ctx.fillStyle = '#fff'
         ctx.textBaseline = 'middle'
         ctx.textAlign = 'center'
@@ -173,11 +153,9 @@
 
       // 获取像素点
       const data = ctx.getImageData(0, 0, width, height).data
-      const girdX = 30
-      const girdY = 30
       const items = []
-      for (let x = 0; x < width; x += girdX) {
-        for (let y = 0; y < height; y += girdY) {
+      for (let x = 0; x < width; x += gird) {
+        for (let y = 0; y < height; y += gird) {
           let pos = (y * width + x) * 4
           if (data[pos + 3] > 128) {
             items.push({ x, y, rgba: [data[pos], data[pos + 1], data[pos + 2], data[pos + 3]] })
@@ -247,7 +225,9 @@
       }
       balls.forEach((ball, index) => {
         const { x, y, rgba } = items[index]
-        if (rgba[0] === 255 && rgba[1] === 255 && rgba[2] === 255 && rgba[3] === 255) {
+        const isBlack = rgba[0] === 0 && rgba[1] === 0 && rgba[2] === 0
+        const isWhite = rgba[0] === 255 && rgba[1] === 255 && rgba[2] === 255 && rgba[3] === 255
+        if (isBlack || isWhite) {
           ball.color = parseColor(Math.random() * 0xffffff)
         } else {
           ball.color = `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`
@@ -255,7 +235,7 @@
         ball.tx = x - width / 2
         ball.ty = y - height / 2
         ball.tz = 10
-        ball.tr = 10
+        ball.tr = 5
       })
       ballLength = balls.length
     }
@@ -270,33 +250,22 @@
       })
       isDisperse = true
     }
-
-    function init () {
-      mouse.x = width / 1.8
-      mouse.y = height / 1.8
+    
+    function loadImage (src, callback) {
       const image = new Image()
-      image.src = '../canvas/chrome.png'
-      image.onload = () => {
-        calculate(getImageData(image))
-        drawFrame()
-        loadAnimation = true
-      }
+      image.src = src
+      image.onload = callback
     }
 
-    init()
-
-    function changeText () {
+    function change (imageData) {
       if (loadAnimation) return
       complete = { length: 0 }
       setTimeout(() => {
-        calculate(getImageData(document.getElementById('J_textInput').value))
+        calculate(imageData)
         isDisperse = false
         loadAnimation = true
       }, isDisperse ? 0 : 1000)
-      if (!isDisperse) {
-        disperse()
-        loadAnimation = true
-      }
+      if (!isDisperse) disperseAction()
     }
 
     function disperseAction () {
@@ -305,7 +274,26 @@
       loadAnimation = true
     }
 
-    document.getElementById('J_confirm').addEventListener('click', changeText)
+    function init () {
+      mouse.x = width / 1.8
+      mouse.y = height / 1.8
+      loadImage('../canvas/github-logo.png', async function () {
+        change(getImageData(this, 18))
+        drawFrame()
+        await sleep(5000)
+        loadImage('../canvas/twitter-logo.png', function () {
+          change(getImageData(this, 20))
+        })
+        await sleep(5000)
+        loadImage('../canvas/apple.png', function () {
+          change(getImageData(this, 18))
+        })
+      })
+    }
+
+    init()
+
+    document.getElementById('J_confirm').addEventListener('click', () => { change(getImageData(document.getElementById('J_textInput').value)) })
     document.getElementById('J_disperse').addEventListener('click', disperseAction)
   </script>
 </body>
