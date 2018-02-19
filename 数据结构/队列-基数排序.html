@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>队列-基数排序</title>
+</head>
+
+<body>
+  <script>
+    function Queue() {
+      this.dataStore = [];
+      this.enqueue = enqueue;
+      this.dequeue = dequeue;
+      this.front = front;
+      this.back = back;
+      this.toString = toString;
+      this.empty = empty;
+    }
+    function enqueue(element) {
+      this.dataStore.push(element);
+    }
+    function dequeue() {
+      return this.dataStore.shift();
+    }
+    function front() {
+      return this.dataStore[0];
+    }
+    function back() {
+      return this.dataStore[this.dataStore.length - 1];
+    }
+    function toString() {
+      var retStr = "";
+      for (var i = 0; i < this.dataStore.length; ++i) {
+        retStr += this.dataStore[i] + "\n";
+      }
+      return retStr;
+    }
+    function empty() {
+      return this.dataStore.length == 0;
+    }
+  </script>
+  <script>
+    window.onload = function () {
+      // 根据相应位(个位或十位)上的数值，将数字分配到相应队列的函数
+      function distribute(nums, queues, n, digit) { // 参数 digit 表示个位或十位上的值
+        var execute = digit === 1 ? 
+          function (i) { queues[nums[i] % 10].enqueue(nums[i]) } :
+          function (i) { queues[Math.floor(nums[i] / 10)].enqueue(nums[i]) }
+
+        for (var i = 0; i < n; ++i) {
+          execute(i)
+        }
+      }
+      // 从队列中收集数字的函数
+      function collect(queues, nums) {
+        var i = 0;
+        for (var digit = 0; digit < 10; ++digit) {
+          while (!queues[digit].empty()) {
+            nums[i++] = queues[digit].dequeue();
+          }
+        }
+      }
+
+      var queues = [];
+      var nums = [];
+      for (var i = 0; i < 10; ++i) {
+        nums[i] = Math.floor(Math.floor(Math.random() * 101));
+        queues[i] = new Queue();
+      }
+      console.log("Before radix sort: ");
+      console.log(nums.join(' '));
+      // 个位排序
+      distribute(nums, queues, 10, 1);
+      collect(queues, nums);
+      // // 十位排序
+      distribute(nums, queues, 10, 10);
+      collect(queues, nums);
+      console.log("\n\nAfter radix sort: ");
+      console.log(nums.join(' '));
+    }
+  </script>
+</body>
+
+</html>
