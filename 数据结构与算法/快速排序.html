@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>快速排序</title>
+</head>
+<body>
+  <script>
+    function qSort (nums) {
+      if (nums.length === 0) return []
+      var length = nums.length
+      var lesser = []
+      var greater = []
+      var pivot = nums[0]
+      for (var i = 1; i < length; i++) {
+        if (nums[i] < pivot) {
+          lesser.push(nums[i])
+        } else {
+          greater.push(nums[i])
+        }
+      }
+      return qSort(lesser).concat(pivot, qSort(greater))
+    }
+    var nums = [123,435,546,67,768,678,56]
+    console.log('before: ', nums)
+    console.log('after ', qSort(nums))
+    </script>
+</body>
+</html>
