@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>插入排序</title>
+</head>
+<body>
+  <script>
+    function insertionSort (nums) {
+      var length = nums.length
+      for (var outer = 1; outer <= length - 1; outer++) {
+        var inner = outer
+        var temp = nums[inner]
+        while (inner > 0 && nums[inner - 1] >= temp) {
+          nums[inner] = nums[inner - 1]
+          --inner
+        }
+        nums[inner] = temp
+      }
+      return nums
+    }
+    var nums = [123,435,546,67,768,678,56]
+    console.log('before: ', nums)
+    console.log('after ', insertionSort(nums))
+  </script>
+</body>
+</html>
