@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>react setState</title>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script src="./prop-types.js"></script>
+  <script src="./react-16.2.0.js"></script>
+  <script src="./create-react-class-15.6.3.js"></script>
+  <script src="./react-dom-16.2.0.js"></script>
+
+  <script>
+    // const element = React.createElement(
+    //   'h1',
+    //   { className: 'greeting' },
+    //   'Hello, world!'
+    // )
+    // ReactDOM.render(
+    //   element,
+    //   document.getElementById('container')
+    // )
+
+    const Item = createReactClass({
+      propTypes: {
+        name: PropTypes.string.isRequired
+      },
+      getInitialState: function() {
+        return {count: 0, color: '#ccc'}
+      },
+      changeTitle: function () {
+        // this.setState({ count: ++this.state.count })
+        debugger
+        this.setState({ color: '#f00' })
+        console.log(this.state)
+      },
+      render: function () {
+        return (
+          React.createElement('div', {className: 'item'},
+            [
+              React.createElement('h4', {key: 1, className: 'title', style: { color: this.state.color }}, this.props.name + this.state.count),
+              React.createElement('button', {key: 2, className: 'button', onClick: this.changeTitle}, 'change')
+            ]
+          )
+        )
+      },
+    })
+    const element = React.createElement(Item, { name: 'Hello, world! ' })
+
+    ReactDOM.render(
+      element,
+      document.getElementById('container')
+    )
+  </script>
+</body>
+
+</html>
