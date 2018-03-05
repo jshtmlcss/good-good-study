@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>栈</title>
+</head>
+<body>
+  <input type="text" id="textInput" value="">
+  <button id="addButton">添加</button>
+  <button id="undoButton">撤销</button>
+  <button id="redoButton">还原</button>
+  <ul id="list"></ul>
+  <script>
+    var addBtn = document.getElementById('addButton')
+    var undoBtn = document.getElementById('undoButton')
+    var redoBtn = document.getElementById('redoButton')
+    var textInput = document.getElementById('textInput')
+    var list = document.getElementById('list')
+
+    // 操作栈
+    var actionStack = []
+    // 当前操作指针
+    var actionIndex = 0
+
+    // 对象基类
+    function BaseAction () {}
+    // 入栈
+    BaseAction.prototype.push = function () {
+      actionStack[actionIndex++] = this
+      actionStack.length = actionIndex
+    }
+    BaseAction.prototype.undo = function () {}
+    BaseAction.prototype.redo = function () {}
+
+    // 文字添加的撤销还原操作
+    function AddAction (itemId, value) {
+      this.itemId = itemId 
+      this.value = value
+    }
+    AddAction.prototype = new BaseAction()
+    // 撤销具体逻辑
+    AddAction.prototype.undo = function () {
+      var item = document.getElementById(this.itemId)
+      list.removeChild(item)
+    }
+    // 还原具体逻辑
+    AddAction.prototype.redo = function () {
+      var item = document.createElement('li')
+      item.id = this.itemId
+      item.innerHTML = this.value
+      list.appendChild(item)
+    }
+
+    function getId () {
+      return Math.random().toString(16).slice(2)
+    }
+    // 添加文字到列表
+    function addItem () {
+      if (!textInput.value.trim()) return
+      var li = document.createElement('li')
+      var id = getId()
+      var value = textInput.value
+      li.id = id
+      li.innerHTML = textInput.value
+      list.appendChild(li)
+      // 创建添加操作到栈里
+      new AddAction(id, value).push()
+    }
+    // 撤销事件响应
+    function undo () {
+      if (actionIndex > 0) {
+        actionStack[--actionIndex].undo()
+      }
+    }
+    // 还原事件响应
+    function redo () {
+      if (actionIndex < actionStack.length) {
+        actionStack[actionIndex++].redo()
+      }
+    }
+
+    addBtn.addEventListener('click', addItem)
+    undoBtn.addEventListener('click', undo)
+    redoBtn.addEventListener('click', redo)
+  </script>
+</body>
+</html>
