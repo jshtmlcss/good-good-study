@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>装饰器模式</title>
+</head>
+<body>
+  <script>
+    function Sale (price) {
+      this.price = price || 100
+      this.decoratorsList = []
+    }
+
+    Sale.prototype.getPrice = function () {
+      var price = this.price
+      this.decoratorsList.forEach(decorator => {
+        price = Sale.decorators[decorator].getPrice(price)
+      })
+      return price
+    }
+
+    Sale.prototype.decorate = function (decorator) {
+      this.decoratorsList.push(decorator)
+    }
+
+    // 装饰器对象
+    Sale.decorators = {}
+
+    Sale.decorators.fedtax = {
+      getPrice: function (price) {
+        price += price * 5 / 10
+        return price
+      }
+    }
+
+    Sale.decorators.quebec = {
+      getPrice: function (price) {
+        price += price * 7.5 / 100
+        return price
+      }
+    }
+
+    Sale.decorators.money = {
+      getPrice: function (price) {
+        return `$${price.toFixed(2)}`
+      }
+    }
+
+    var sale = new Sale(250)
+    sale.decorate('fedtax')
+    sale.decorate('quebec')
+    sale.decorate('money')
+    var price = sale.getPrice()
+    console.log(price)
+  </script>
+</body>
+</html>
