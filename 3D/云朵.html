@@ -46,21 +46,21 @@
   <script type="module">
     import { captureMouse } from '../common/utils.js'
 
-    let image = new Image()
+    const image = new Image()
     image.onload = init 
     image.src = '../canvas/cloud.png'
 
     // 初始化
     function init () {
-      let canvas = document.getElementById('canvas')
-      let width = canvas.width = document.documentElement.clientWidth
-      let height = canvas.height = document.documentElement.clientHeight
-      let ctx = canvas.getContext('2d')
-      let clouds = createCloud(50)
-      let fl = 250          // 观察点距离（镜头焦距）
-      let vpX = width / 2   // 消失点，设为画布中心
-      let vpY = height / 2  // 消失点，设为画布中心
-      let mouse = captureMouse(canvas) // 鼠标在canvas上移动的坐标
+      const canvas = document.getElementById('canvas')
+      const width = canvas.width = document.documentElement.clientWidth
+      const height = canvas.height = document.documentElement.clientHeight
+      const ctx = canvas.getContext('2d')
+      const clouds = createCloud(50)
+      const fl = 250          // 观察点距离（镜头焦距）
+      const vpX = width / 2   // 消失点，设为画布中心
+      const vpY = height / 2  // 消失点，设为画布中心
+      const mouse = captureMouse(canvas) // 鼠标在canvas上移动的坐标
       let angleY // Y轴角度
       let angleX // X轴角度
   
@@ -70,7 +70,7 @@
        * @returns {Object} 返回云朵类集合
        */
       function createCloud (nums) {
-        let clouds = []
+        const clouds = []
         while (nums--) {
           clouds.push(new Cloud({
             image,
@@ -88,11 +88,11 @@
        * @param {Number} angle 角度
        */
       function rotateX (cloud, angle) {                      
-        let cos = Math.cos(angle)
-        let sin = Math.sin(angle)
+        const cos = Math.cos(angle)
+        const sin = Math.sin(angle)
         // 通过X轴旋转公式得到ypos, zpos
-        let y1 = cloud.ypos * cos - cloud.zpos * sin
-        let z1 = cloud.zpos * cos + cloud.ypos * sin
+        const y1 = cloud.ypos * cos - cloud.zpos * sin
+        const z1 = cloud.zpos * cos + cloud.ypos * sin
 
         cloud.ypos = y1
         cloud.zpos = z1
@@ -105,11 +105,11 @@
        * @param {Number} angle 角度
        */
       function rotateY (cloud, angle) {
-        let sin = Math.sin(angle)
-        let cos = Math.cos(angle)
+        const sin = Math.sin(angle)
+        const cos = Math.cos(angle)
         // 通过Y轴旋转公式得到xpos, zpos
-        let x1 = cloud.xpos * cos - cloud.zpos * sin
-        let z1 = cloud.zpos * cos + cloud.xpos * sin
+        const x1 = cloud.xpos * cos - cloud.zpos * sin
+        const z1 = cloud.zpos * cos + cloud.xpos * sin
   
         cloud.xpos = x1
         cloud.zpos = z1
@@ -122,7 +122,7 @@
       function setPerspective (cloud) {
         // 防止比例出错要做一个判断
         if (cloud.zpos > -fl) {
-          let scale = fl / (fl + cloud.zpos) // 产生 0～1 之间的一个值，用来做缩放和靠近消失点的一个比例
+          const scale = fl / (fl + cloud.zpos) // 产生 0～1 之间的一个值，用来做缩放和靠近消失点的一个比例
           cloud.scaleX = cloud.scaleY = scale
 
           cloud.x = vpX + cloud.xpos * scale
