@@ -6,20 +6,20 @@ const dns = require('dns')
 //   console.log(error)
 // })
 
-// dns.resolve4('archive.org', (err, addresses) => {
-//   if (err) throw err
+dns.resolve4('archive.org', (err, addresses) => {
+  if (err) throw err
 
-//   console.log(`IP 地址: ${JSON.stringify(addresses)}`)
+  console.log(`IP 地址: ${JSON.stringify(addresses)}`)
 
-//   addresses.forEach((a) => {
-//     dns.reverse(a, (err, hostnames) => {
-//       if (err) {
-//         throw err
-//       }
-//       console.log(`IP 地址 ${a} 逆向解析到域名: ${JSON.stringify(hostnames)}`)
-//     })
-//   })
-// })
+  addresses.forEach((a) => {
+    dns.reverse(a, (err, hostnames) => {
+      if (err) {
+        throw err
+      }
+      console.log(`IP 地址 ${a} 逆向解析到域名: ${JSON.stringify(hostnames)}`)
+    })
+  })
+})
 
 // DNS请求的独立解析程序。使用默认的设置创建一个新的解析程序。
 // const { Resolver } = require('dns')

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>GIF parse</title>
+  <style>
+  #container {
+    display: flex;
+    width: 500px;
+    height: 500px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+  #container canvas {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  </style>
+</head>
+<body>
+  <input type="file" id="fileUpload" accept="image/*">
+  <div id="container"></div>
+  <script type="module">
+    // import Parser from './parser.js'
+
+    // const parser = new Parser()
+
+    // parser.load('./gif.gif')
+    //   // progress
+    //   .on('loadProgress', (loaded, total) => {
+    //     console.log('loadProgress:', Math.ceil((loaded / total) * 100) + '%')
+    //   })
+    //   .on('parseProgress', (name, current, total) => {
+    //     console.log('parseProgress:', Math.ceil((current / total) * 100) + '%')
+    //   })
+
+    //   // parse
+    //   // .on('parseHeader', header => {
+    //   //   console.log('parseHeader', header)
+    //   // })
+    //   // .on('parseImg', img => {
+    //   //   console.log('parseImg', img)
+    //   // })
+    //   // .on('parseGCExt', block => {
+    //   //   console.log('parseGCExt', block)
+    //   // })
+    //   .on('parseEnd', block => {
+    //     console.log('parseEnd', block)
+    //   })
+
+    //   // Status
+    //   .on('loaded', e => {
+    //     console.log('loaded:', e)
+    //   })
+    //   .on('loadError', error => {
+    //     console.log(error)
+    //   })
+    //   .on('parseError', error => {
+    //     console.log(error)
+    //   })
+
+    import Gif from './gif.js'
+
+    const gif = new Gif()
+      // .load('https://media.giphy.com/media/3LxT7zGwvzg1LRlYwY/giphy-downsized.gif')
+      // .load('./gif.gif')
+      // .load('https://media.giphy.com/media/czHaWIdC2S6nWb4biN/giphy-downsized.gif')
+      // .load('https://freshdesign.io/img/inspiration/woveC.gif')
+      // .load('https://freshdesign.io/img/inspiration/tramastudio.gif')
+      .load('https://media.giphy.com/media/9GIF5xzrlceVrDcvrJ/giphy.gif')
+
+    gif.parser
+      .on('loadProgress', (loaded, total) => {
+        console.log('loadProgress:', Math.ceil((loaded / total) * 100) + '%')
+      })
+      .on('parseProgress', (name, current, total) => {
+        console.log('parseProgress:', Math.ceil((current / total) * 100) + '%')
+      })
+      .on('parseEnd', () => {
+        gif.play()
+      })
+
+    document.getElementById('container').appendChild(gif.canvas)
+
+    fileUpload.onchange = function (e) {
+      const file = e.target.files[0]
+      gif.load(file)
+    }
+
+    window.gif = gif
+    
+  </script>
+</body>
+</html>

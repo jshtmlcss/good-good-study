@@ -3,6 +3,7 @@
  */
 (function () {
   const task = new window.Worker('worker.js') // 创建 worker 实例
+  let arr = []
   const actions = {
     /**
      * 终止 worker
@@ -12,16 +13,20 @@
      */
     closeInMain () {
       task.terminate()
+      arr = null
       console.log('已终止')
     },
     postMessage (e) {
-      task.postMessage(e.target.value) // 发送消息到 worker
+      for (let i = 0; i < 10000000; i++) {
+        arr[i] = i
+      }
+      task.postMessage(arr || e.target.value) // 发送消息到 worker
     },
     onerror (e) {
       console.log(e)
     },
     onmessage (e) {
-      console.log('从worker传回来的数据：' + e.data)
+      // console.log('从worker传回来的数据：' + e.data)
     }
   }
   // 出错捕获

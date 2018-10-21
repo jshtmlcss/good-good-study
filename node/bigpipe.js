@@ -1,6 +1,17 @@
+// 写入的数据量如果太少（length < 1000 ?），在IOS FIREFOX上会出现等待res.end()执行完成之后才显示页面，也就是bigpipe不起作用
 var http = require('http')
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+function getData () {
+  let str = ''
+  let i = 0
+  while (i < 1000) {
+    str += i
+    i++
+  }
+  return str
+}
 
 var app = http.createServer((req, res) => {
   res.writeHead(200, {
@@ -8,7 +19,7 @@ var app = http.createServer((req, res) => {
     'charset': 'utf-8'
   })
 
-  res.write('loading...<br>')
+  res.write('loading...<br>' + getData())
 
   return sleep(2000)
     .then(function () {

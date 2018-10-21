@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <button id="add">add</button>
+  <button id="remove">remove</button>
+  <script>
+    window.onload = function () {
+
+      var arr = []
+      var getData = (function () {
+        var data = []
+        for (let i = 0; i< 4000000; i++) {
+          data.push(i)
+        }
+        return function () {
+          return data
+        }
+      }());
+      var arr2 = getData()
+      function create () {
+        var i = 0
+        while (i < 100000) {
+          arr.push(i)
+          i++
+        }
+        console.log(arr2.length)
+      }
+      add.onclick = function () {
+        create()
+        console.log(arr.length)
+      }
+      remove.onclick = function () {
+        // add.onclick = null
+        // remove.onclick = null
+        arr = []
+        arr2.length = 0
+        // arr2 = []
+        console.log(1, arr2.length, getData().length)
+      }
+    }
+
+    </script>
+    <!-- <script>
+        window.onload = function () {
+    
+          var arr = []
+          var result = {}
+  
+          function getData (callback) {
+            var data = {}
+            for (let i = 0; i< 4000000; i++) {
+              data[i] = i
+            }
+            setTimeout(function () {
+              console.log('result settimeout', data[100])
+            }, 5000)
+            callback(data)
+          }
+        
+          function create () {
+            var i = 0
+            while (i < 100000) {
+              arr.push(i)
+              i++
+            }
+            console.log(result[100])
+          }
+
+          getData(function(data){
+            result = data
+            console.log('result ok: ', result[100])
+          })
+
+          add.onclick = function () {
+            create()
+            console.log(arr.length)
+          }
+  
+          remove.onclick = function () {
+            // add.onclick = null
+            // remove.onclick = null
+            arr = []
+            result = {}
+            console.log('result: ', result[100])
+          }
+        }
+    
+        </script> -->
+</body>
+</html>

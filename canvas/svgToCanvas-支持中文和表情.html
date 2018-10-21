@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>svgToCanvas 支持中文、emoji</title>
+  <style>
+    .red {
+      color: #f00;
+    }
+    .border {
+      border: 1px solid #ccc;
+    }
+    .text {
+      width: 100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="float: left;">
+    <p>
+      HTML and SVG
+    </p>
+    <div id="html">
+      <svg height="100">
+        <rect x="0" width="20" height="50" style="fill:blue;" />
+        <rect x="20" width="20" height="80" style="fill:transparent;stroke-width:0.5;stroke: blue;" />
+        <circle r="20" cx="50" cy="50" style="fill:yellow;" />
+        <text x="10" y="30" font-size="20" style="fill: pink;" transform="translate(30) rotate(45 50 50)">
+          Hello, 你好，😄
+        </text>
+      </svg>
+      <p class="text red border">HTML P标签</p>
+    </div>
+  </div>
+
+  <div style="float: left;">
+    <p>
+      IMAGE
+    </p>
+    <img/>
+  </div>
+  <div style="float: left;">
+    <p>
+      CANVAS
+    </p>
+    <canvas></canvas>
+  </div>
+
+  <div style="float: left;">
+    <a id="dl" download="Canvas.png" href="#">Download Canvas</a>
+  </div>
+  <script>
+    // http://stackoverflow.com/questions/3768565/drawing-a-svg-file-on-a-html5-canvas
+
+    var html = document.querySelector('#html');
+    var img = document.querySelector('img');
+    var canvas = document.querySelector('canvas');
+
+    // get svg data
+    var html = new XMLSerializer().serializeToString(html);
+
+    var b64Start = 'data:image/svg+xml;charset=utf-8,';
+
+    img.src = b64Start + (
+      '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180">' +
+        '<foreignObject x="0" y="0" width="100%" height="100%">' +
+          html.replace(/#/g, '%23').replace(/\n/g, '%0A') +
+          document.querySelector('style').outerHTML +
+        '</foreignObject>' +
+      '</svg>'
+    )
+
+    img.onload = function () {
+      canvas.width = img.width
+      canvas.height = img.height
+
+      // draw the image onto the canvas
+      canvas.getContext('2d').drawImage(img, 0, 0);
+    }
+
+    function dlCanvas() {
+      var dt = canvas.toDataURL('image/png'); // << this fails in IE/Edge...
+      dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+      dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
+      this.href = dt;
+    };
+    document.getElementById('dl').addEventListener('click', dlCanvas, false);
+  </script>
+</body>
+
+</html>

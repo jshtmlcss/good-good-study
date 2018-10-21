@@ -10,9 +10,7 @@ class ProxyServer {
   // 创建代理服务
   _createServer () {
     // 仅支持 http 协议
-    this._server = http.createServer(
-      (this._requestListener = this._requestListener.bind(this))
-    )
+    this._server = http.createServer(this._requestListener.bind(this))
 
     return this._server
   }
@@ -42,6 +40,11 @@ class ProxyServer {
 }
 
 const helpers = {
+  /**
+   * 设置响应头内容为代理的响应头内容
+   * @param {Object} res 响应体
+   * @param {Object} proxyRes 代理响应体 
+   */
   setHeads (res, proxyRes) {
     Object.keys(proxyRes.headers).forEach(key => {
       const header = proxyRes.headers[key]
@@ -49,6 +52,11 @@ const helpers = {
       res.setHeader(String(key).trim(), header)
     })
   },
+  /**
+   * 写入响应状态码
+   * @param {Object} res 响应体
+   * @param {Object} proxyRes 代理响应体
+   */
   writeStatusCode (res, proxyRes) {
     if (proxyRes.statusMessage) {
       res.writeHead(proxyRes.statusCode, proxyRes.statusMessage)
@@ -56,6 +64,11 @@ const helpers = {
       res.writeHead(proxyRes.statusCode)
     }
   },
+  /**
+   * 获取代理的请求选项
+   * @param {Object} opts 选项
+   * @param {Object} req 请求体
+   */
   getRequestOptions (opts, req) {
     const options = {
       port: helpers.getPort(opts.target),
@@ -82,19 +95,28 @@ const helpers = {
     return options
   },
   getPort (target) {
-    return target.port || target.protocol === 'https:' ? 443 : 80
+    return target.port || (target.protocol === 'https:' ? 443 : 80)
   }
 }
 
 // example
 new ProxyServer({
-  target: 'http://nodejs.cn',
+  target: 'http://localhost:9527',
   config: {
     headers: {
-      host: 'nodejs.cn',
+      host: 'localhost',
       cookie: ''
     }
   }
 }).listen(8005)
+// new ProxyServer({
+//   target: 'http://nodejs.cn',
+//   config: {
+//     headers: {
+//       host: 'nodejs.cn',
+//       cookie: ''
+//     }
+//   }
+// }).listen(8005)
 
 console.log('http proxy server started on port 8005')
