@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>流星</title>
+  <style>
+    body {margin: 0;}
+  </style>
+</head>
+<body>
+  <canvas id="starts" style="background: #000;"></canvas>
+  <script>
+    class Meteor {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.vx = 1
+        this.vy = 1
+        this.alpha = 1
+        this.length = 100
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        this.x += this.vx
+        this.y += this.vy
+        ctx.globalAlpha = this.alpha
+        ctx.drawImage(Meteor.image, this.x, this.y, this.length, this.length)
+      }
+      static getMeteorImage () {
+        const canvas = document.createElement('canvas')
+        const width = canvas.width = 100
+        const height = canvas.height = 100
+        const ctx = canvas.getContext('2d')
+        const grd = ctx.createLinearGradient(0, 0, 100, 100)
+        grd.addColorStop(0, 'rgba(0,0,0,0)')
+        grd.addColorStop(1, `rgba(255,255,255,1)`)
+        ctx.strokeStyle = grd
+        ctx.lineCap = 'round'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(100, 100)
+        ctx.stroke()
+        ctx.closePath()
+        return canvas
+      }
+    }
+    Meteor.image = Meteor.getMeteorImage()
+  </script>
+  <script>
+    const canvas = document.getElementById('starts')
+    const ctx = canvas.getContext('2d')
+    const width = canvas.width = document.documentElement.clientWidth
+    const height = canvas.height = document.documentElement.clientHeight
+    const meteors = (function createMeteors(nums) {
+      const result = []
+      while (nums--) {
+        result.push(new Meteor(resetPostion()))
+      }
+      return result
+    })(5);
+
+    function resetPostion () {
+      const speed = Math.random() * 2 + 2
+      return {
+        x: Math.random() * width,
+        y: Math.random() * -height,
+        vx: speed,
+        vy: speed,
+        length: Math.random() * 100 + 30,
+        alpha: 1
+      }
+    }
+
+    function drawMeteor (meteor) {
+      if (meteor.y > height || meteor.alpha < 0) {
+        Object.assign(meteor, resetPostion())
+      }
+      meteor.draw(ctx)
+      meteor.alpha-=0.003
+    }
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.save()
+      ctx.clearRect(0, 0, width, height)
+      meteors.forEach(drawMeteor)
+      ctx.restore()
+    })()
+  </script>
+</body>
+</html>

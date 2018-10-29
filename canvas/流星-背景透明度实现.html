@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>流星</title>
+  <style>
+    body {margin: 0;}
+  </style>
+</head>
+<body>
+  <canvas id="starts" style="background: #000;"></canvas>
+  <script>
+    class Meteor {
+      constructor (props) {
+        this.x = 0
+        this.y = 0
+        this.vx = 1
+        this.vy = 1
+        this.radius = 2
+        this.alpha = 1
+        Object.assign(this, props)
+      }
+      draw (ctx) {
+        this.x += this.vx
+        this.y += this.vy
+        ctx.strokeStyle = 'rgba(255,255,255,' + this.alpha + ')'
+        ctx.lineCap = 'round'
+        ctx.lineWidth = this.radius
+        ctx.beginPath()
+        ctx.moveTo(this.x, this.y)
+        ctx.lineTo(this.x + this.vx, this.y + this.vy)
+        ctx.stroke()
+        ctx.closePath()
+      }
+    }
+  </script>
+  <script>
+    const canvas = document.getElementById('starts')
+    const ctx = canvas.getContext('2d')
+    const width = canvas.width = document.documentElement.clientWidth
+    const height = canvas.height = document.documentElement.clientHeight
+    const meteors = (function createMeteors(nums) {
+      const result = []
+      while (nums--) {
+        result.push(new Meteor(resetPostion()))
+      }
+      return result
+    })(5);
+
+    function resetPostion () {
+      const speed = Math.random() * 2 + 2
+      return {
+        x: Math.random() * width,
+        y: Math.random() * -height,
+        vx: speed,
+        vy: speed,
+        radius: Math.random() * 3 + 1,
+        alpha: 1
+      }
+    }
+
+    function drawMeteor (meteor) {
+      if (meteor.y > height || meteor.alpha < 0) {
+        Object.assign(meteor, resetPostion())
+      }
+      meteor.draw(ctx)
+      meteor.alpha-=0.003
+    }
+
+    ;(function drawFrame() {
+      window.requestAnimationFrame(drawFrame)
+      ctx.save()
+      ctx.fillStyle = 'rgba(0,0,0,.1)'
+      ctx.fillRect(0, 0, width, height)
+      meteors.forEach(drawMeteor)
+      ctx.restore()
+    })()
+  </script>
+</body>
+</html>
