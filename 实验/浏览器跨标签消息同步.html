@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>浏览器多tab消息同步</title>
+</head>
+
+<body>
+  <button onclick="storageEventEmitter.emit('background', '#000')">设置body背景</button>
+  <button onclick="storageEventEmitter.emit('background', null)">移除body背景</button>
+  <br>
+  <br>
+  <button onclick="storageEventEmitter.emit('url', 'http://baidu.com')">跳链接</button>
+  <button onclick="storageEventEmitter.emit('reload')">刷新</button>
+  <br>
+  <br>
+  <textarea id="J_message" style="width: 300px;height: 200px;" readonly></textarea>
+  <br>
+  <input type="text" id="J_text" value="test">
+  <button onclick="sendComment()">发表评论</button>
+
+  <script>
+    const slice = Array.prototype.slice
+
+    class EventEmitter {
+      constructor() {
+        this.handlers = {}
+      }
+      on(eventName, fn) {
+        if (!this.handlers[eventName]) this.handlers[eventName] = []
+        this.handlers[eventName].push(fn)
+      }
+      emit(eventName) {
+        if (Array.isArray(this.handlers[eventName])) {
+          const args = slice.call(arguments, 1)
+          this.handlers[eventName].forEach(handler => {
+            handler.apply(null, args)
+          })
+        }
+      }
+      remove(eventName, fn) {
+        const handlers = this.handlers[eventName]
+        if (Array.isArray(handlers)) {
+          const index = handlers.indexOf(fn)
+          if (index !== -1) {
+            handlers.splice(index, 1)
+          }
+        }
+      }
+    }
+
+    class LocalStorageEventEmitter extends EventEmitter {
+      constructor () {
+        super()
+        this.prefix = 'VeryStorage'
+        window.addEventListener('storage', this.__onstorage = this.__onstorage.bind(this))
+      }
+      emit (eventName) {
+        if (Array.isArray(this.handlers[eventName])) {
+          localStorage[this.prefix + ':' + eventName] = JSON.stringify({
+            timestamp: new Date().getTime(),
+            args: slice.call(arguments, 1)
+          })
+          super.emit.apply(this, arguments)
+        }
+      }
+      __onstorage(e) {
+        if (e.key && e.key.indexOf(this.prefix) !== -1) {
+          const eventName = e.key.split(':')[1]
+          const args = JSON.parse(e.newValue).args
+          args.unshift(eventName)
+          args.push(e)
+          super.emit.apply(this, args)
+        }
+      }
+    }
+
+
+    // 使用
+
+    const storageEventEmitter = new LocalStorageEventEmitter()
+
+    // 设置body背景
+    storageEventEmitter.on('background', function (color, event) {
+      document.body.style.background = color || null
+      console.log(color, event)
+    })
+
+    // 跳转页面
+    storageEventEmitter.on('url', function (url, event) {
+      location.href = url
+      console.log(url, event)
+    })
+
+    // 跳转页面
+    storageEventEmitter.on('reload', function (value, event) {
+      location.reload()
+      console.log(value, event)
+    })
+
+    // 发表评论
+    function sendComment () {
+      storageEventEmitter.emit('comment', document.getElementById('J_text').value)
+    }
+    storageEventEmitter.on('comment', function (value, event) {
+      document.getElementById('J_message').value += '\n' + value
+      console.log(value, event)
+    })
+
+  </script>
+</body>
+
+</html>
