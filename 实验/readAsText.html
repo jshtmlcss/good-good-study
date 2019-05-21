@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>readAsText</title>
+</head>
+<body>
+  <input type="file" id="J_fileInput">
+  <iframe id="link"></iframe>
+  <script>
+    document.getElementById('J_fileInput').onchange = function (e) {
+      const files = e.target.files
+      const reader = new FileReader()
+      reader.onload = function () {
+        console.log(reader)
+        // window.open(reader.result)
+        // document.getElementById('link').src = reader.result
+      }
+      reader.onprogress = function (event) {
+        console.log(event)
+      }
+      reader.readAsText(files[0].slice(0, 100))
+      // reader.readAsDataURL(files[0])
+      // reader.readAsBinaryString(files[0])
+    }
+  </script>
+</body>
+</html>

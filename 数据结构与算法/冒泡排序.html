@@ -1,29 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>冒泡排序</title>
+  <title>冒泡排序 O(n2)</title>
 </head>
+
 <body>
   <script>
-      var nums = [13,345,6,234,32344,2,0,66]
-      function bubbleSort (nums) {
-        var length = nums.length
-        for (var outer = length; outer >= 2; --outer) {
-          for (var inner = 0; inner < outer - 1; ++inner) {
-            if (nums[inner] > nums[inner + 1]) {
-              var temp = nums[inner]
-              nums[inner] = nums[inner + 1]
-              nums[inner + 1] = temp
-            }
+    function bubbleSort(array) {
+      const length = array.length
+      for (var i = 0; i < length; i++) {
+        for (var j = 0; j < length - 1 - i; j++) {
+          if (array[j] > array[j + 1]) {
+            swap(array, j, j + 1)
           }
         }
-        return nums
       }
-      console.log('before: ', nums)
-      console.log('after ', bubbleSort(nums))
-    </script>
+      return array
+    }
+    function swap(array, index1, index2) {
+      const arr1 = array[index1]
+      array[index1] = array[index2]
+      array[index2] = arr1
+    }
+    const data = [13, 345, 6, 234, 32344, 2, 0, 66]
+    console.log('before: ', data)
+    console.log('after ', bubbleSort(data))
+  </script>
 </body>
+
 </html>

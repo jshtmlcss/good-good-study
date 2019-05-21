@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>setTimeout-requestAnimationFrame</title>
+  <style>
+    #box {
+      margin: 20px;
+      width: 100px;
+      height: 100px;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <div id="box"></div>
+  <button onclick="useSetTimeout()">useSetTimeout</button>
+  <button onclick="useRequestAnimationFrame()">useRequestAnimationFrame</button>
+  <button onclick="task()">task</button>
+  <button onclick="reset()">reset</button>
+  <script>
+    const box = document.getElementById('box')
+    let width = 100
+
+    function useSetTimeout () {
+      clearTimeout(box.timer)
+      animate()
+      box.timer = setTimeout(useSetTimeout, 1000 / 60)
+    }
+    function useRequestAnimationFrame () {
+      cancelAnimationFrame(box.timer)
+      animate()
+      box.timer = requestAnimationFrame(useRequestAnimationFrame)
+    }
+    function animate () {
+      box.style.width = width++ + 'px'
+    }
+    function reset () {
+      clearTimeout(box.timer)
+      cancelAnimationFrame(box.timer)
+      width = 100
+      box.style.width = width + 'px'
+    }
+    function task () {
+      for (let i = 0; i < 150000000; i++) {
+      }
+      console.log('done')
+    }
+  </script>
+</body>
+</html>

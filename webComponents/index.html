@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>AppDrawer</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      height: 100%;
+    }
+
+    .page {
+      position: relative;
+      margin: 0 auto;
+      background-color: #f0eff5;
+      height: 100%;
+    }
+
+    .page__header {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background-color: #fff;
+    }
+
+    .page__header-button {
+      background-color: #fff;
+      border: none;
+      color: #2d2d2d;
+      cursor: pointer;
+    }
+
+    .page__content {
+      padding: 10px;
+      line-height: 30px;
+    }
+
+    .page__drawer {
+      color: #fff;
+    }
+
+    /* 定义前隐藏组件 */
+    app-drawer:not(:defined) {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="page__header">
+      <!-- 设置组件open属性 -->
+      <button class="page__header-button" onclick="drawer.setAttribute('open', '')">
+        <svg viewBox="0 0 1024 1024" style="width: 25px; height: 25px;">
+          <path
+            d="M800 320 224 320c-17.664 0-32-14.336-32-32s14.336-32 32-32l576 0c17.696 0 32 14.336 32 32S817.696 320 800 320z"
+            fill="currentColor"></path>
+          <path
+            d="M800 544 224 544c-17.664 0-32-14.336-32-32s14.336-32 32-32l576 0c17.696 0 32 14.336 32 32S817.696 544 800 544z"
+            fill="currentColor"></path>
+          <path
+            d="M800 768 224 768c-17.664 0-32-14.336-32-32s14.336-32 32-32l576 0c17.696 0 32 14.336 32 32S817.696 768 800 768z"
+            fill="currentColor"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="page__content">
+      <h4 style="text-align:center;">沁园春·雪</h4>
+      &#12288;&#12288;北方的风光，千里冰封冻，万里雪花飘。望长城内外，只剩下无边无际白茫茫一片；宽广的黄河上下，顿时失去了滔滔水势。山岭好像银白色的蟒蛇在飞舞，高原上的丘陵好像许多白象在奔跑，它们都想与老天爷比比高。要等到晴天的时候，看红艳艳的阳光和白皑皑的冰雪交相辉映，分外美好。
+      <br />
+      <br />
+      &#12288;&#12288;江山如此媚娇，引得无数英雄竞相倾倒。只可惜秦始皇、汉武帝，略差文学才华；唐太宗、宋太祖，稍逊文治功劳。称雄一世的人物成吉思汗，只知道拉弓射大雕。这些人物全都过去了，称得上能建功立业的英雄人物，还要看今天的人们。
+    </div>
+
+    <!-- 使用定义的组件 -->
+    <app-drawer id="drawer">
+      <ul class="page__drawer">
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+      </ul>
+    </app-drawer>
+  </div>
+
+  <template id="app-drawer-template">
+    <style>
+      /* :host 用于设置根级组件样式，外部定义的样式会覆盖此处定义的样式 */
+      :host {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        width: 200px;
+        height: 100%;
+        background-color: #2d2d2d;
+        transition: .3s ease;
+      }
+
+      :host(.close) {
+        transform: translate3d(-100%, 0, 0)
+      }
+    </style>
+    <!-- 内容插槽，和 Vue 类似 -->
+    <slot></slot>
+    <slot name="close">
+      <button id="close">关闭</button>
+    </slot>
+  </template>
+
+  <script>
+    (function () {
+      class AppDrawer extends HTMLElement {
+        constructor() {
+          super()
+          this._handleClick = this._handleClick.bind(this)
+          this.close()
+          this._createShadowDOM()
+          this._handleEvent('add')
+        }
+        // 设置需要检测的属性，可用于初始化组件状态
+        static get observedAttributes() {
+          return ['open']
+        }
+        set isOpen (value) {
+          if (value) {
+            this.setAttribute('open', '')
+          } else {
+            this.removeAttribute('open')
+          }
+        }
+        get isOpen() {
+          return this.hasAttribute('open')
+        }
+        // 在observedAttributes里设置了检测的属性，修改了就会调用，相当于vue watch
+        attributeChangedCallback(name, oldValue, newValue) {
+          this.toggle()
+        }
+        // 元素插入到dom后调用
+        connectedCallback() {
+        }
+        // 元素移出dom后调用
+        disconnectedCallback() {
+          this.handleEvent('remove')
+        }
+        _createShadowDOM() {
+          const shadowRoot = this.attachShadow({ mode: 'open' })
+          const template = document.querySelector('#app-drawer-template')
+          const instance = template.content.cloneNode(true)
+          shadowRoot.appendChild(instance)
+        }
+        _handleEvent(action) {
+          // 通过 this.shadowRoot.querySelector 选择组件里的元素
+          const closeButton = this.shadowRoot.querySelector('#close')
+          if (closeButton) {
+            closeButton[`${action}EventListener`]('click', this._handleClick)
+          }
+        }
+        _handleClick () {
+          this.isOpen = false
+        }
+        open() {
+          this.classList.remove('close')
+        }
+        close() {
+          this.classList.add('close')
+        }
+        toggle() {
+          if (this.isOpen) {
+            this.open()
+          } else {
+            this.close()
+          }
+        }
+      }
+      // 定义组件
+      window.customElements.define('app-drawer', AppDrawer)
+    })()
+  </script>
+</body>
+
+</html>
